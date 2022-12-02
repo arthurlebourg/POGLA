@@ -1,4 +1,5 @@
 #include "program.hh"
+#include <climits>
 
 double old_pos_x = 0;
 double old_pos_y = 0;
@@ -19,8 +20,6 @@ void set_prog_var(std::shared_ptr<Program> p)
 
 void mouse_motion_callback(GLFWwindow *, double x, double y)
 {
-    x = x;
-    y = y;
     if (firstMouse)
     {
         old_pos_x = x;
@@ -161,13 +160,35 @@ GLFWwindow *init_window()
 
 Program::Program(std::string &vertex_shader_src,
                  std::string &fragment_shader_src,
-                 std::string &vertex_single_color_src,
-                 std::string &fragment_single_color_src, GLFWwindow *window,
+                 GLFWwindow *window,
                  std::shared_ptr<Scene> scene)
     : scene_(scene)
     , window_(window)
     , render_shader_(Shader(vertex_shader_src, fragment_shader_src))
-    , single_color_(Shader(vertex_single_color_src, fragment_single_color_src))
+{
+    ready_ = false;
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    render_shader_.use();
+
+    glfwSetCursorPosCallback(window, mouse_motion_callback);
+    glfwSetKeyCallback(window, keyboard_callback);
+
+    ready_ = true;
+}
+
+Program::Program(std::string &vertex_shader_src, std::string &fragment_shader_src,
+        std::string &geometry_shader_src, std::string &tess_control_src,
+        std::string &tess_eval_src, GLFWwindow *window,
+        std::shared_ptr<Scene> scene)
+        : scene_(scene),
+        window_(window),
+        render_shader_(Shader(vertex_shader_src, fragment_shader_src,
+                                geometry_shader_src, tess_control_src,
+                                tess_eval_src))
 {
     ready_ = false;
     glEnable(GL_DEPTH_TEST);
@@ -227,15 +248,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
 {
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     glClear(
-        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
-        | GL_STENCIL_BUFFER_BIT); // don't forget to clear the stencil buffer!
-
-    single_color_.use();
-    single_color_.set_vec3_uniform("light_pos", scene_->get_light());
-    single_color_.set_mat4_uniform("model_view_matrix", model_view_matrix);
-    single_color_.set_mat4_uniform("projection_matrix", projection_matrix);
-    single_color_.set_vec3_uniform("cam_pos",
-                                   model_view_matrix * glm::vec4(0, 0, 0, 1));
+        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     render_shader_.use();
     render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
@@ -246,39 +259,20 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
     for (auto obj : scene_->get_objs())
     {
-        // first pass, render to stencil
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        render_shader_.use();
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
-        glBindVertexArray(obj->get_VAO());
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);TEST_OPENGL_ERROR();
+        glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
+        glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
+        render_shader_.use();TEST_OPENGL_ERROR();
+        glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
 
-        render_shader_.bind_texture(obj);
+        render_shader_.bind_texture(obj);TEST_OPENGL_ERROR();
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 
-        glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
+        glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
+        glDrawArrays(GL_PATCHES, 0, 4);TEST_OPENGL_ERROR();
+        //glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
         TEST_OPENGL_ERROR();
-
-        // second pass, render upscaled obj
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        glDisable(GL_DEPTH_TEST);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        single_color_.use();
-        float scale = 1.1f;
-        glBindVertexArray(obj->get_VAO());
-        single_color_.bind_texture(obj);
-
-        single_color_.set_mat4_uniform(
-            "transform",
-            glm::scale(obj->get_transform(), glm::vec3(scale, scale, scale)));
-
-        glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
-        glBindVertexArray(0);
-        glStencilMask(0xFF);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);
-        glEnable(GL_DEPTH_TEST);
     }
 
     glfwSwapBuffers(window_);

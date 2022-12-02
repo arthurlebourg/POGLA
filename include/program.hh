@@ -13,9 +13,12 @@ GLFWwindow *init_window();
 class Program
 {
 public:
+    Program(std::string &vertex_shader_src, std::string &fragment_shader_src, GLFWwindow *window,
+            std::shared_ptr<Scene> scene);
+
     Program(std::string &vertex_shader_src, std::string &fragment_shader_src,
-            std::string &vertex_single_color_src,
-            std::string &fragment_single_color_src, GLFWwindow *window,
+            std::string &geometry_shader_src, std::string &tess_control_src,
+            std::string &tess_eval_src, GLFWwindow *window,
             std::shared_ptr<Scene> scene);
 
     ~Program();
@@ -43,7 +46,6 @@ private:
     GLFWwindow *window_;
 
     Shader render_shader_;
-    Shader single_color_;
 
     bool ready_;
 };

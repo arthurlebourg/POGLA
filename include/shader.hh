@@ -7,6 +7,10 @@ class Shader
 {
 public:
     Shader(std::string &vertex_shader_src, std::string &fragment_shader_src);
+    Shader(std::string &vertex_shader_src, std::string &fragment_shader_src,
+           std::string &geometry_shader_src,
+           std::string &tess_control_shader_src,
+           std::string &tess_eval_shader_src);
 
     ~Shader();
 
@@ -20,9 +24,6 @@ public:
 
 private:
     unsigned int shader_program_;
-
-    unsigned int vertex_shader_;
-    unsigned int fragment_shader_;
 
     char log[512];
 };
