@@ -259,7 +259,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
     for (auto obj : scene_->get_objs())
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);TEST_OPENGL_ERROR();
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);TEST_OPENGL_ERROR();
         glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
         glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
         render_shader_.use();TEST_OPENGL_ERROR();
@@ -272,13 +272,11 @@ void Program::render(glm::mat4 const &model_view_matrix,
         // gl patch paremeter i for triangle adjecency
         //glPatchParameteri(GL_PATCH_VERTICES, 3);TEST_OPENGL_ERROR();
 
-        glPatchParameteri(GL_PATCH_VERTICES, 6);TEST_OPENGL_ERROR();
+        //glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
 
-        glDrawArrays(GL_TRIANGLES_ADJACENCY, 0, obj->get_triangles_number());
-        TEST_OPENGL_ERROR();
+        //glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, obj->get_triangles_number());
         //glBindVertexArray(0);TEST_OPENGL_ERROR();
-        //glDrawArrays(GL_PATCHES, 0, 4);TEST_OPENGL_ERROR();
-        //glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
+        glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
         TEST_OPENGL_ERROR();
     }
 

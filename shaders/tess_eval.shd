@@ -1,10 +1,10 @@
 #version 450
 
 // put the layout for lines
-layout(triangles, equal_spacing, ccw) in;
+layout(isolines, equal_spacing, ccw) in;
 //layout(quads, equal_spacing, ccw) in;
 
-in TCS_OUT {
+in VS_OUT {
     vec3 position;
     vec3 normal;
     vec2 uv;
