@@ -1,6 +1,6 @@
 #version 450
 
-layout(vertices = 4) out;
+layout(vertices = 6) out;
 
 in VS_OUT {
     vec3 position;
@@ -16,6 +16,16 @@ out TCS_OUT {
 
 void main()
 {
+    gl_TessLevelOuter[0] = 1.0;
+    gl_TessLevelOuter[1] = 1.0;
+    gl_TessLevelOuter[2] = 1.0;
+    gl_TessLevelOuter[3] = 1.0;
+    //gl_TessLevelOuter[4] = 1.0;
+    //gl_TessLevelOuter[5] = 1.0;
+
+    gl_TessLevelInner[0] = 1.0;
+    gl_TessLevelInner[1] = 1.0;
+
     tcs_out[gl_InvocationID].position = tcs_in[gl_InvocationID].position;
     tcs_out[gl_InvocationID].normal = tcs_in[gl_InvocationID].normal;
     tcs_out[gl_InvocationID].uv = tcs_in[gl_InvocationID].uv;

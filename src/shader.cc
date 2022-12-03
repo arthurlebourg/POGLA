@@ -4,15 +4,15 @@
 
 Shader::Shader(std::string &vertex_shader_src, std::string &fragment_shader_src)
 {
-    int success;
-
-    GLuint shader_ids[2];
+    GLint compile_status = GL_TRUE;
+    GLuint shader_id[2];
     
-    shader_ids[0] = glCreateShader(GL_VERTEX_SHADER);
-    shader_ids[1] = glCreateShader(GL_FRAGMENT_SHADER);
-    shader_program_ = glCreateProgram();
+    shader_id[0] = glCreateShader(GL_VERTEX_SHADER);
+    shader_id[1] = glCreateShader(GL_FRAGMENT_SHADER);
+
     std::string vertex_shader_content = read_file(vertex_shader_src);
     std::string fragment_shader_content = read_file(fragment_shader_src);
+
     char *vertex_shd_src =
         (char *)std::malloc(vertex_shader_content.length() * sizeof(char));
     char *fragment_shd_src =
@@ -21,39 +21,82 @@ Shader::Shader(std::string &vertex_shader_src, std::string &fragment_shader_src)
     vertex_shader_content.copy(vertex_shd_src, vertex_shader_content.length());
     fragment_shader_content.copy(fragment_shd_src,
                                  fragment_shader_content.length());
-    glShaderSource(shader_ids[0], 1, (const GLchar **)&(vertex_shd_src), NULL);
-    glShaderSource(shader_ids[1], 1, (const GLchar **)&(fragment_shd_src), NULL);
+    
+    glShaderSource(shader_id[0], 1, (const GLchar **)&(vertex_shd_src), NULL);
+    glShaderSource(shader_id[1], 1, (const GLchar **)&(fragment_shd_src),
+                   NULL);
+
     for (int i = 0; i < 2; i++)
     {
-        glCompileShader(shader_ids[i]);
-
-        glGetShaderiv(shader_ids[i], GL_COMPILE_STATUS, &success);
-
-        if (!success)
+        glCompileShader(shader_id[i]);
+        TEST_OPENGL_ERROR();
+        glGetShaderiv(shader_id[i], GL_COMPILE_STATUS, &compile_status);
+        if (compile_status != GL_TRUE)
         {
-            glGetShaderInfoLog(shader_ids[i], 512, NULL, log);
-            std::cout << "ERROR::SHADER::COMPILATION_FAILED\n"
-                      << log << std::endl;
-            return;
+            GLint log_size;
+            char *shader_log;
+            glGetShaderiv(shader_id[i], GL_INFO_LOG_LENGTH, &log_size);
+            shader_log = (char *)std::malloc(
+                log_size + 1); /* +1 pour le caractere de fin de chaine '\0' */
+            if (shader_log != 0)
+            {
+                glGetShaderInfoLog(shader_id[i], log_size, &log_size,
+                                   shader_log);
+                std::cerr << "SHADER " << i << ": " << shader_log << std::endl;
+                std::free(shader_log);
+            }
+            std::free(vertex_shd_src);
+            std::free(fragment_shd_src);
+            glDeleteShader(shader_id[0]);
+            glDeleteShader(shader_id[1]);
+            return ;
         }
     }
-    free(vertex_shd_src);
-    free(fragment_shd_src);
+    std::free(vertex_shd_src);
+    std::free(fragment_shd_src);
 
-    for (int i = 0; i < 2; i++)
+    GLint link_status = GL_TRUE;
+    shader_program_ = glCreateProgram();
+    TEST_OPENGL_ERROR();
+    if (shader_program_ == 0)
     {
-        glAttachShader(shader_program_, shader_ids[i]);
-    }
-    glLinkProgram(shader_program_);
-
-    glGetProgramiv(shader_program_, GL_LINK_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(shader_program_, 512, NULL, log);
-        std::cout << "ERROR::SHADER::LINKAGE_FAILED\n" << log << std::endl;
+        std::cerr << "ERROR: Impossible to create the shader program"
+                  << std::endl;
         return;
     }
+    for (int i = 0; i < 2; i++)
+    {
+        glAttachShader(shader_program_, shader_id[i]);
+        TEST_OPENGL_ERROR();
+    }
+    glLinkProgram(shader_program_);
+    TEST_OPENGL_ERROR();
+    glGetProgramiv(shader_program_, GL_LINK_STATUS, &link_status);
+    if (link_status != GL_TRUE)
+    {
+        GLint log_size;
+        char *program_log;
+        glGetProgramiv(shader_program_, GL_INFO_LOG_LENGTH, &log_size);
+        program_log = (char *)std::malloc(
+            log_size + 1); /* +1 pour le caractere de fin de chaine '\0' */
+        if (program_log != 0)
+        {
+            glGetProgramInfoLog(shader_program_, log_size, &log_size,
+                                program_log);
+            std::cerr << "Program " << program_log << std::endl;
+            std::free(program_log);
+        }
+        glDeleteProgram(shader_program_);
+        TEST_OPENGL_ERROR();
+        glDeleteShader(shader_id[0]);
+        TEST_OPENGL_ERROR();
+        glDeleteShader(shader_id[1]);
+        TEST_OPENGL_ERROR();
+        shader_program_ = 0;
+        return;
+    }
+    glUseProgram(shader_program_);
+    TEST_OPENGL_ERROR();
 }
 
 Shader::Shader(std::string &vertex_shader_src, std::string &fragment_shader_src,

@@ -254,8 +254,8 @@ void Program::render(glm::mat4 const &model_view_matrix,
     render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
     render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);
     render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);
-    render_shader_.set_vec3_uniform("cam_pos",
-                                    model_view_matrix * glm::vec4(0, 0, 0, 1));
+    //render_shader_.set_vec3_uniform("cam_pos",
+    //                                model_view_matrix * glm::vec4(0, 0, 0, 1));
 
     for (auto obj : scene_->get_objs())
     {
@@ -269,8 +269,15 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 
-        glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
-        glDrawArrays(GL_PATCHES, 0, 4);TEST_OPENGL_ERROR();
+        // gl patch paremeter i for triangle adjecency
+        //glPatchParameteri(GL_PATCH_VERTICES, 3);TEST_OPENGL_ERROR();
+
+        glPatchParameteri(GL_PATCH_VERTICES, 6);TEST_OPENGL_ERROR();
+
+        glDrawArrays(GL_TRIANGLES_ADJACENCY, 0, obj->get_triangles_number());
+        TEST_OPENGL_ERROR();
+        //glBindVertexArray(0);TEST_OPENGL_ERROR();
+        //glDrawArrays(GL_PATCHES, 0, 4);TEST_OPENGL_ERROR();
         //glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
         TEST_OPENGL_ERROR();
     }

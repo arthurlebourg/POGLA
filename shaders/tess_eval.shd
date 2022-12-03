@@ -1,6 +1,8 @@
 #version 450
 
-layout(quads, equal_spacing, ccw) in;
+// put the layout for lines
+layout(triangles, equal_spacing, ccw) in;
+//layout(quads, equal_spacing, ccw) in;
 
 in TCS_OUT {
     vec3 position;
@@ -16,6 +18,21 @@ out TCE_OUT {
 
 void main()
 {
+    
+    gl_Position = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
+    tce_out.position = mix(tcs_out[0].position, tcs_out[1].position, gl_TessCoord.x);
+    tce_out.normal = mix(tcs_out[0].normal, tcs_out[1].normal, gl_TessCoord.x);
+    tce_out.uv = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
+    /*
+    vec4 pos1 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
+    vec4 pos2 = mix(gl_in[2].gl_Position, gl_in[3].gl_Position, gl_TessCoord.x);
+    vec4 pos = mix(pos1, pos2, gl_TessCoord.y);
+    
+    gl_Position = pos;
+    /*tce_out.position = tcs_out[0].position;
+    tce_out.normal = tcs_out[0].normal;
+    tce_out.uv = tcs_out[0].uv;* /
+
     vec3 p1 = mix(tcs_out[0].position, tcs_out[1].position, gl_TessCoord.x);
     vec3 p2 = mix(tcs_out[2].position, tcs_out[3].position, gl_TessCoord.x);
     vec3 p = mix(p1, p2, gl_TessCoord.y);
@@ -29,11 +46,6 @@ void main()
     vec2 uv1 = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
     vec2 uv2 = mix(tcs_out[2].uv, tcs_out[3].uv, gl_TessCoord.x);
     vec2 uv = mix(uv1, uv2, gl_TessCoord.y);
-    tce_out.uv = uv;
+    tce_out.uv = uv;*/
 
-    vec4 pos1 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
-    vec4 pos2 = mix(gl_in[2].gl_Position, gl_in[3].gl_Position, gl_TessCoord.x);
-    vec4 pos = mix(pos1, pos2, gl_TessCoord.y);
-    
-    gl_Position = pos;
 }
