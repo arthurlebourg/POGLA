@@ -248,6 +248,17 @@ glm::mat4 Object::move(const glm::vec3 pos)
     return transform_;
 }
 
+void Object::add_force(const glm::vec3 force)
+{
+    body_->applyCentralForce(btVector3(force.x, force.y, force.z));
+    
+}
+
+void Object::add_torque(const glm::vec3 torque)
+{
+    body_->applyTorque(btVector3(torque.x, torque.y, torque.z));
+}
+
 glm::mat4 Object::get_transform()
 {
     return transform_;

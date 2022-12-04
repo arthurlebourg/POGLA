@@ -104,7 +104,7 @@ void Program::display()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        update_physics(deltaTime);
+        scene_->update_physics(deltaTime);
         scene_->get_player()->set_speed(key_states['Q']);
         scene_->get_player()->move(key_states['W'] - key_states['S'],
                                    key_states['D'] - key_states['A'],
@@ -215,30 +215,6 @@ GLFWwindow *Program::get_window()
     return window_;
 }
 
-void Program::update_physics(const float deltaTime)
-{
-    scene_->get_dynamic_world()->stepSimulation(deltaTime * 75.0f / 60.0f, 1);
-    btTransform trans;
-    trans.setIdentity();
-    btRigidBody *player_body = scene_->get_player()->get_body();
-    player_body->getMotionState()->getWorldTransform(trans);
-    scene_->get_player()->set_position(trans.getOrigin().getX(),
-                                       trans.getOrigin().getY(),
-                                       trans.getOrigin().getZ());
-
-    for (auto obj : scene_->get_objs())
-    {
-        trans.setIdentity();
-
-        btRigidBody *body = obj->get_body();
-        body->getMotionState()->getWorldTransform(trans);
-
-        btScalar m[16];
-        trans.getOpenGLMatrix(m);
-        obj->set_transform(m);
-    }
-}
-
 void Program::render(glm::mat4 const &model_view_matrix,
                      glm::mat4 const &projection_matrix)
 {
@@ -255,7 +231,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
     for (auto obj : scene_->get_objs())
     {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);TEST_OPENGL_ERROR();
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);TEST_OPENGL_ERROR();
         glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
         glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
         render_shader_.use();TEST_OPENGL_ERROR();
@@ -265,10 +241,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 
-        // gl patch paremeter i for triangle adjecency
-        //glPatchParameteri(GL_PATCH_VERTICES, 3);TEST_OPENGL_ERROR();
-
-        glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
+        glPatchParameteri(GL_PATCH_VERTICES, 3);TEST_OPENGL_ERROR();
 
         glDrawArrays(GL_PATCHES, 0, obj->get_triangles_number());
         //glBindVertexArray(0);TEST_OPENGL_ERROR();

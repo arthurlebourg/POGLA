@@ -3,7 +3,7 @@
 // put the layout for lines
 layout(isolines, equal_spacing, cw) in;
 
-in TCS_OUT {
+in VS_OUT {
     vec3 position;
     vec3 normal;
     vec2 uv;
@@ -20,7 +20,7 @@ uniform mat4 projection_matrix;
 
 void main()
 {
-    /*vec3 normal1 = normalize(tcs_out[0].normal + tcs_out[1].normal + tcs_out[2].normal);
+    vec3 normal1 = normalize(tcs_out[0].normal + tcs_out[1].normal + tcs_out[2].normal);
     vec3 normal2 = normalize(tcs_out[1].normal + tcs_out[2].normal + tcs_out[3].normal);
 
     vec3 center1 = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0;
@@ -34,8 +34,8 @@ void main()
     // check if dot1 and dot2 have the same sign
     if (dot1 * dot2 > 0.0) {
         // if so, discard the triangle
-        return;
-    }*/
+        //return;
+    }
 
     /*gl_Position = mix(gl_in[1].gl_Position, gl_in[2].gl_Position, gl_TessCoord.x);
 
@@ -43,7 +43,7 @@ void main()
     tce_out.normal = mix(tcs_out[1].normal, tcs_out[2].normal, gl_TessCoord.x);
     tce_out.uv = mix(tcs_out[1].uv, tcs_out[2].uv, gl_TessCoord.x);
     */
-    
+
     vec4 pos1 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
     vec4 pos2 = mix(gl_in[2].gl_Position, gl_in[3].gl_Position, gl_TessCoord.x);
     vec4 pos = mix(pos1, pos2, gl_TessCoord.y);

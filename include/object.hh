@@ -10,6 +10,8 @@
 class Object
 {
 public:
+    Object(const glm::vec3 position, const std::vector<glm::vec3> vertices);
+
     Object(const std::string obj_file, const std::string texture,
            const glm::vec3 position, const float obj_mass);
 
@@ -26,6 +28,10 @@ public:
     btRigidBody *get_body();
 
     glm::mat4 move(const glm::vec3 pos);
+    
+    void add_force(const glm::vec3 force);
+
+    void add_torque(const glm::vec3 torque);
 
     glm::mat4 get_transform();
 
@@ -34,6 +40,8 @@ public:
     glm::vec3 get_position();
 
     btCollisionShape *get_colShape();
+
+    std::string tag = "";
 
 private:
     glm::vec3 position_;

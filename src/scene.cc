@@ -61,3 +61,27 @@ btDiscreteDynamicsWorld *Scene::get_dynamic_world()
 {
     return dynamicsWorld_;
 }
+
+void Scene::update_physics(const float deltaTime)
+{
+    dynamicsWorld_->stepSimulation(deltaTime * 75.0f / 60.0f, 1);
+    btTransform trans;
+    trans.setIdentity();
+    btRigidBody *player_body = player_->get_body();
+    player_body->getMotionState()->getWorldTransform(trans);
+    player_->set_position(trans.getOrigin().getX(),
+                                       trans.getOrigin().getY(),
+                                       trans.getOrigin().getZ());
+
+    for (auto obj : objects_)
+    {
+        trans.setIdentity();
+
+        btRigidBody *body = obj->get_body();
+        body->getMotionState()->getWorldTransform(trans);
+
+        btScalar m[16];
+        trans.getOpenGLMatrix(m);
+        obj->set_transform(m);
+    }
+}

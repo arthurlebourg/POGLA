@@ -35,8 +35,6 @@ public:
 
     void update_position();
 
-    void update_physics(const float deltaTime);
-
     void render(glm::mat4 const &model_view_matrix,
                 glm::mat4 const &projection_matrix);
 

@@ -12,22 +12,29 @@ int main()
 
     Object plane("objects/plane.obj", "textures/white.tga", glm::vec3(0, 0, 0),
                  0.0);
-    Object amogus("objects/amongus.obj", "textures/pierre_sang.tga",
-                  glm::vec3(0, 30, 30), 1.0);
+    //Object amogus("objects/amongus.obj", "textures/pierre_sang.tga",
+    //              glm::vec3(0, 30, 30), 1.0);
+    Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, 10, 0),
+                1.0);
 
     auto scene = std::make_shared<Scene>(glm::vec3(0.0, 10.0, 0.0));
     auto player =
         std::make_shared<Player>(glm::vec3(0, 10, 0.0), glm::vec3(0, 0, -1));
     scene->add_player(player);
     scene->add_object(std::make_shared<Object>(plane));
-    scene->add_object(std::make_shared<Object>(amogus));
+    //scene->add_object(std::make_shared<Object>(amogus));
+    scene->add_object(std::make_shared<Object>(cube));
 
-    std::shared_ptr<Program> prog = std::make_shared<Program>(
-        shd_vertex, shd_fragment, shd_geometry, shd_tess_control, shd_tess_eval,
-        window, scene);
+    scene->get_objs()[1]->add_torque(glm::vec3(0, 0, 0.1));
+    scene->get_objs()[1]->tag = "cube";
+
 
     //std::shared_ptr<Program> prog = std::make_shared<Program>(
-    //    shd_vertex, shd_fragment, window, scene);
+    //    shd_vertex, shd_fragment, shd_geometry, shd_tess_control, shd_tess_eval,
+    //    window, scene);
+
+    std::shared_ptr<Program> prog = std::make_shared<Program>(
+        shd_vertex, shd_fragment, window, scene);
 
     set_prog_var(prog);
     if (!prog->is_ready())

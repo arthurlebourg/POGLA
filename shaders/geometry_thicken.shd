@@ -1,7 +1,7 @@
 #version 450
 
 layout (lines) in;
-layout (line_strip, max_vertices = 2) out;
+layout (triangle_strip, max_vertices = 4) out;
 
 in TCE_OUT {
     vec3 position;
@@ -40,8 +40,12 @@ void main()
         vec3 half_direction = normalize(light_direction + view_direction);
         float specular = pow(max(dot(normal_direction, half_direction), 0.0), 32.0);
 
+        vec4 position = projection_matrix * model_view_matrix * gl_in[i].gl_Position;
         gs_out.color = object_color * (diffuse + specular);
-        gl_Position = projection_matrix * model_view_matrix * gl_in[i].gl_Position;
+        gl_Position = position - vec4(0.0, 0.25, 0.0, 0.0);
+        EmitVertex();
+        gs_out.color = object_color * (diffuse + specular);
+        gl_Position = position + vec4(0.0, 0.25, 0.0, 0.0);
         EmitVertex();
     }
 

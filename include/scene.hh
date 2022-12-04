@@ -21,6 +21,8 @@ public:
 
     btDiscreteDynamicsWorld *get_dynamic_world();
 
+    void update_physics(const float deltaTime);
+
 private:
     std::shared_ptr<Player> player_;
 
