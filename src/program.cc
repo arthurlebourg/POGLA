@@ -268,9 +268,9 @@ void Program::render(glm::mat4 const &model_view_matrix,
         // gl patch paremeter i for triangle adjecency
         //glPatchParameteri(GL_PATCH_VERTICES, 3);TEST_OPENGL_ERROR();
 
-        //glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
+        glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
 
-        glDrawArrays(GL_LINE_STRIP_ADJACENCY, 0, obj->get_triangles_number());
+        glDrawArrays(GL_PATCHES, 0, obj->get_triangles_number());
         //glBindVertexArray(0);TEST_OPENGL_ERROR();
         //glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
         TEST_OPENGL_ERROR();

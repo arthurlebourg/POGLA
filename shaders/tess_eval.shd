@@ -1,10 +1,9 @@
 #version 450
 
 // put the layout for lines
-layout(isolines, equal_spacing, ccw) in;
-//layout(quads, equal_spacing, ccw) in;
+layout(isolines, equal_spacing, cw) in;
 
-in VS_OUT {
+in TCS_OUT {
     vec3 position;
     vec3 normal;
     vec2 uv;
@@ -16,22 +15,40 @@ out TCE_OUT {
     vec2 uv;
 } tce_out;
 
+uniform mat4 model_view_matrix;
+uniform mat4 projection_matrix;
+
 void main()
 {
+    /*vec3 normal1 = normalize(tcs_out[0].normal + tcs_out[1].normal + tcs_out[2].normal);
+    vec3 normal2 = normalize(tcs_out[1].normal + tcs_out[2].normal + tcs_out[3].normal);
+
+    vec3 center1 = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0;
+    vec3 center2 = (gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz + gl_in[3].gl_Position.xyz) / 3.0;
     
-    gl_Position = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
-    tce_out.position = mix(tcs_out[0].position, tcs_out[1].position, gl_TessCoord.x);
-    tce_out.normal = mix(tcs_out[0].normal, tcs_out[1].normal, gl_TessCoord.x);
-    tce_out.uv = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
-    /*
+    vec3 cam_pos = vec3(transpose(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0));
+
+    float dot1 = dot(normal1, normalize(cam_pos - center1));
+    float dot2 = dot(normal2, normalize(cam_pos - center2));
+
+    // check if dot1 and dot2 have the same sign
+    if (dot1 * dot2 > 0.0) {
+        // if so, discard the triangle
+        return;
+    }*/
+
+    /*gl_Position = mix(gl_in[1].gl_Position, gl_in[2].gl_Position, gl_TessCoord.x);
+
+    tce_out.position = mix(tcs_out[1].position, tcs_out[2].position, gl_TessCoord.x);
+    tce_out.normal = mix(tcs_out[1].normal, tcs_out[2].normal, gl_TessCoord.x);
+    tce_out.uv = mix(tcs_out[1].uv, tcs_out[2].uv, gl_TessCoord.x);
+    */
+    
     vec4 pos1 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
     vec4 pos2 = mix(gl_in[2].gl_Position, gl_in[3].gl_Position, gl_TessCoord.x);
     vec4 pos = mix(pos1, pos2, gl_TessCoord.y);
     
     gl_Position = pos;
-    /*tce_out.position = tcs_out[0].position;
-    tce_out.normal = tcs_out[0].normal;
-    tce_out.uv = tcs_out[0].uv;* /
 
     vec3 p1 = mix(tcs_out[0].position, tcs_out[1].position, gl_TessCoord.x);
     vec3 p2 = mix(tcs_out[2].position, tcs_out[3].position, gl_TessCoord.x);
@@ -46,6 +63,7 @@ void main()
     vec2 uv1 = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
     vec2 uv2 = mix(tcs_out[2].uv, tcs_out[3].uv, gl_TessCoord.x);
     vec2 uv = mix(uv1, uv2, gl_TessCoord.y);
-    tce_out.uv = uv;*/
+    tce_out.uv = uv;
+    
 
 }

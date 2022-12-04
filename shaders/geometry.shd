@@ -1,9 +1,9 @@
 #version 450
 
-layout (lines_adjacency) in;
-layout (line_strip, max_vertices = 4) out;
+layout (lines) in;
+layout (line_strip, max_vertices = 2) out;
 
-in VS_OUT {
+in TCE_OUT {
     vec3 position;
     vec3 normal;
     vec2 uv;
@@ -27,12 +27,10 @@ uniform mat4 projection_matrix;
 
 void main()
 {
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
     {
         gs_out.uv = tce_out[i].uv;
         vec3 normal = normalize(tce_out[i].normal);
-        //gl_Position = projection_matrix * model_view_matrix * gl_in[i].gl_Position;
-        //EmitVertex();
 
         vec3 light_direction = normalize(light_pos - gl_in[i].gl_Position.xyz);
         vec3 normal_direction = normalize(normal);
