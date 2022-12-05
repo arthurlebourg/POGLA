@@ -91,14 +91,15 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         else if (line.substr(0, 2) == "f ")
         {
             std::string s(line.substr(2));
-            std::string vertex1, vertex2, vertex3;
-            unsigned int vertexIndex[4], uvIndex[4], normalIndex[4];
-            int matches = sscanf(s.c_str(), "%u/%u/%u %u/%u/%u %u/%u/%u %u/%u/%u\n",
+            unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+            //unsigned int vertexIndex[4], uvIndex[4], normalIndex[4];
+            int matches = sscanf(s.c_str(), "%u/%u/%u %u/%u/%u %u/%u/%u \n",
                                  &vertexIndex[0], &uvIndex[0], &normalIndex[0],
                                  &vertexIndex[1], &uvIndex[1], &normalIndex[1],
-                                 &vertexIndex[2], &uvIndex[2], &normalIndex[2],
-                                 &vertexIndex[3], &uvIndex[3], &normalIndex[3]);
-            if (matches != 12)
+                                 &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
+                                 //&vertexIndex[3], &uvIndex[3], &normalIndex[3]);
+            if (matches != 9)
+            //if (matches != 12)
             {
                 printf("File can't be read by our simple parser : ( Try "
                        "exporting with other options\n");
@@ -108,15 +109,15 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vertexIndices.push_back(vertexIndex[0]);
             vertexIndices.push_back(vertexIndex[1]);
             vertexIndices.push_back(vertexIndex[2]);
-            vertexIndices.push_back(vertexIndex[3]);
+            //vertexIndices.push_back(vertexIndex[3]);
             uvIndices.push_back(uvIndex[0]);
             uvIndices.push_back(uvIndex[1]);
             uvIndices.push_back(uvIndex[2]);
-            uvIndices.push_back(uvIndex[3]);
+            //uvIndices.push_back(uvIndex[3]);
             normalIndices.push_back(normalIndex[0]);
             normalIndices.push_back(normalIndex[1]);
             normalIndices.push_back(normalIndex[2]);
-            normalIndices.push_back(normalIndex[3]);
+            //normalIndices.push_back(normalIndex[3]);
         }
         /* anything else is ignored */
     }

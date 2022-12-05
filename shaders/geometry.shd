@@ -1,60 +1,81 @@
 #version 450
 
-layout (triangles) in;
+layout (triangles_adjacency) in;
 layout (line_strip, max_vertices = 6) out;
 
-in TCE_OUT {
+in VS_OUT {
     vec3 position;
     vec3 normal;
     vec2 uv;
-    vec3 color;
-    vec4 p1;
-    vec4 p2;
-    vec4 p3;
-    vec4 p4;
-    int display;
-} tce_out[];
+} vs_out[];
 
 out GS_OUT {
     vec3 color;
     vec2 uv;
 } gs_out;
 
-uniform vec3 light_pos;
-
-vec3 light_color = vec3(1.0, 1.0, 1.0);
-
-float ambientStrength = 0.1;
-float specularStrength = 0.5;
-
 uniform mat4 model_view_matrix;
 uniform mat4 projection_matrix;
 
 void main()
 {
-    if (tce_out[0].display != 0)
-    {
-        gs_out.color = vec3(1.0, 0.0, 0.0);
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p1;
-        EmitVertex();
+    vec3 normal_main = normalize(vs_out[0].normal + vs_out[2].normal + vs_out[4].normal);
+    vec3 normal1 = normalize(vs_out[0].normal + vs_out[1].normal + vs_out[2].normal);
+    vec3 normal2 = normalize(vs_out[2].normal + vs_out[3].normal + vs_out[4].normal);
+    vec3 normal3 = normalize(vs_out[4].normal + vs_out[5].normal + vs_out[0].normal);
+
+    vec3 center_main = (gl_in[0].gl_Position.xyz + gl_in[2].gl_Position.xyz + gl_in[4].gl_Position.xyz) / 3.0;
+    vec3 center1 = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0;
+    vec3 center2 = (gl_in[2].gl_Position.xyz + gl_in[3].gl_Position.xyz + gl_in[4].gl_Position.xyz) / 3.0;
+    vec3 center3 = (gl_in[4].gl_Position.xyz + gl_in[5].gl_Position.xyz + gl_in[0].gl_Position.xyz) / 3.0;
     
-        gs_out.color = vec3(0.0, 1.0, 0.0);
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p2;
-        EmitVertex();
+    vec3 cam_pos = vec3(inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0));
 
-        gs_out.color = vec3(0.0, 0.0, 1.0);
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p3;
-        EmitVertex();
-    
-        gs_out.color = vec3(1.0, 1.0, 0.0);
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p4;
-        EmitVertex();
+    float dot_main = dot(normalize(cam_pos - center_main), normal_main);
+    float dot1 = dot(normal1, normalize(cam_pos - center1));
+    float dot2 = dot(normal2, normalize(cam_pos - center2));
+    float dot3 = dot(normal3, normalize(cam_pos - center3));
 
+    // check if dot1 and dot2 have the same sign
+    if (dot_main * dot1 <= 0.0) {
+        //Draw
+        gl_Position = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
         gs_out.color = vec3(1.0, 0.0, 0.0);
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p1;
+        gs_out.uv = vs_out[0].uv;
         EmitVertex();
 
+        gl_Position = projection_matrix * model_view_matrix * gl_in[2].gl_Position;
+        gs_out.color = vec3(1.0, 0.0, 0.0);
+        gs_out.uv = vs_out[2].uv;
+        EmitVertex();
         EndPrimitive();
     }
-    
+    if (dot_main * dot2 <= 0.0) {
+        //Draw
+        gl_Position = gl_in[2].gl_Position;
+        gl_Position = projection_matrix * model_view_matrix * gl_in[2].gl_Position;
+        gs_out.color = vec3(1.0, 0.0, 0.0);
+        gs_out.uv = vs_out[2].uv;
+        EmitVertex();
+
+        gl_Position = projection_matrix * model_view_matrix * gl_in[4].gl_Position;
+        gs_out.color = vec3(1.0, 0.0, 0.0);
+        gs_out.uv = vs_out[4].uv;
+        EmitVertex();
+        EndPrimitive();
+        
+    }
+    if (dot_main * dot3 <= 0.0) {
+        //Draw
+        gl_Position = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
+        gs_out.color = vec3(1.0, 0.0, 0.0);
+        gs_out.uv = vs_out[0].uv;
+        EmitVertex();
+
+        gl_Position = projection_matrix * model_view_matrix * gl_in[4].gl_Position;
+        gs_out.color = vec3(1.0, 0.0, 0.0);
+        gs_out.uv = vs_out[4].uv;
+        EmitVertex();
+        EndPrimitive();
+    }
 }

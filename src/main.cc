@@ -10,11 +10,11 @@ int main()
 
     GLFWwindow *window = init_window();
 
-    Object plane("objects/plane_quads.obj", "textures/white.tga", glm::vec3(0, 0, 0),
+    Object plane("objects/plane.obj", "textures/white.tga", glm::vec3(0, 0, 0),
                  0.0);
     //Object amogus("objects/amongus.obj", "textures/pierre_sang.tga",
     //              glm::vec3(0, 30, 30), 1.0);
-    Object cube("objects/cube_quads.obj", "textures/white.tga", glm::vec3(0, 5, -5),
+    Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, 5, -5),
                 0.0);
 
     auto scene = std::make_shared<Scene>(glm::vec3(0.0, 10.0, 0.0));

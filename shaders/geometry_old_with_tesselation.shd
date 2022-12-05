@@ -1,0 +1,60 @@
+#version 450
+
+layout (triangles) in;
+layout (line_strip, max_vertices = 6) out;
+
+in TCE_OUT {
+    vec3 position;
+    vec3 normal;
+    vec2 uv;
+    vec3 color;
+    vec4 p1;
+    vec4 p2;
+    vec4 p3;
+    vec4 p4;
+    int display;
+} tce_out[];
+
+out GS_OUT {
+    vec3 color;
+    vec2 uv;
+} gs_out;
+
+uniform vec3 light_pos;
+
+vec3 light_color = vec3(1.0, 1.0, 1.0);
+
+float ambientStrength = 0.1;
+float specularStrength = 0.5;
+
+uniform mat4 model_view_matrix;
+uniform mat4 projection_matrix;
+
+void main()
+{
+    if (tce_out[0].display != 0)
+    {
+        gs_out.color = tce_out[0].color;
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p1;
+        EmitVertex();
+    
+        gs_out.color = tce_out[0].color;
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p2;
+        EmitVertex();
+
+        gs_out.color = tce_out[0].color;
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p3;
+        EmitVertex();
+    
+        gs_out.color = tce_out[0].color;
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p4;
+        EmitVertex();
+
+        gs_out.color = tce_out[0].color;
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p1;
+        EmitVertex();
+
+        EndPrimitive();
+    }
+    
+}
