@@ -28,7 +28,7 @@ Object::Object(const std::string obj_file, const std::string texture,
 
     glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(glm::vec3),
                  &vertices_[0], GL_STATIC_DRAW);
-    triangles_number_ = vertices_.size();
+    vertices_number_ = vertices_.size();
     TEST_OPENGL_ERROR();
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                           (void *)0);
@@ -142,7 +142,7 @@ Object::Object(const std::string obj_file, const std::string texture,
 
     glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(glm::vec3),
                  &vertices_[0], GL_STATIC_DRAW);
-    triangles_number_ = vertices_.size();
+    vertices_number_ = vertices_.size();
     TEST_OPENGL_ERROR();
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                           (void *)0);
@@ -226,9 +226,9 @@ unsigned int Object::get_VAO()
     return VAO_;
 }
 
-unsigned int Object::get_triangles_number()
+unsigned int Object::get_vertices_number()
 {
-    return triangles_number_;
+    return vertices_number_;
 }
 
 unsigned int Object::get_texture()

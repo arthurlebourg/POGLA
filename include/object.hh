@@ -23,7 +23,7 @@ public:
 
     unsigned int get_VAO();
 
-    unsigned int get_triangles_number();
+    unsigned int get_vertices_number();
 
     btRigidBody *get_body();
 
@@ -48,7 +48,7 @@ private:
     glm::mat4 transform_;
     float mass_;
     unsigned int VAO_;
-    unsigned int triangles_number_;
+    unsigned int vertices_number_;
     unsigned int texture_id_;
 
     std::vector<glm::vec3> vertices_;

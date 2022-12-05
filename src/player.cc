@@ -1,7 +1,7 @@
 #include "player.hh"
 
 Player::Player(const glm::vec3 position, const glm::vec3 direction)
-    : yaw_(90.0)
+    : yaw_(60.0)
     , pitch_(0.0)
     , position_(position)
     , direction_(direction)

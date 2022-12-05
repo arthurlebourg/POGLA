@@ -14,8 +14,8 @@ int main()
                  0.0);
     //Object amogus("objects/amongus.obj", "textures/pierre_sang.tga",
     //              glm::vec3(0, 30, 30), 1.0);
-    Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, 10, 0),
-                1.0);
+    Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, 5, -10),
+                0.0);
 
     auto scene = std::make_shared<Scene>(glm::vec3(0.0, 10.0, 0.0));
     auto player =
@@ -25,7 +25,6 @@ int main()
     //scene->add_object(std::make_shared<Object>(amogus));
     scene->add_object(std::make_shared<Object>(cube));
 
-    scene->get_objs()[1]->add_torque(glm::vec3(0, 0, 0.1));
     scene->get_objs()[1]->tag = "cube";
 
 

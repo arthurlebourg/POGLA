@@ -169,7 +169,6 @@ Program::Program(std::string &vertex_shader_src,
     ready_ = false;
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     render_shader_.use();
 
     glfwSetCursorPosCallback(window, mouse_motion_callback);
@@ -190,8 +189,7 @@ Program::Program(std::string &vertex_shader_src, std::string &fragment_shader_sr
 {
     ready_ = false;
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_LESS);
-    glEnable(GL_STENCIL_TEST);
+    glDepthFunc(GL_LESS);
     render_shader_.use();
 
     glfwSetCursorPosCallback(window, mouse_motion_callback);
@@ -231,9 +229,14 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
     for (auto obj : scene_->get_objs())
     {
+        if (obj->tag == "cube")
+        {
+            // add torque
+            obj->add_torque(glm::vec3(0.0f, 10.0f, 0.0f));
+        }
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);TEST_OPENGL_ERROR();
         glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
-        glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
+        //glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
         render_shader_.use();TEST_OPENGL_ERROR();
         glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
 
@@ -241,11 +244,11 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 
-        glPatchParameteri(GL_PATCH_VERTICES, 3);TEST_OPENGL_ERROR();
+        glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
 
-        glDrawArrays(GL_PATCHES, 0, obj->get_triangles_number());
+        glDrawArrays(GL_PATCHES, 0, obj->get_vertices_number());
         //glBindVertexArray(0);TEST_OPENGL_ERROR();
-        //glDrawArrays(GL_TRIANGLES, 0, obj->get_triangles_number());
+        //glDrawArrays(GL_TRIANGLES, 0, obj->get_vertices_number());
         TEST_OPENGL_ERROR();
     }
 
