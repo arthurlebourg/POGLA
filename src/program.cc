@@ -247,7 +247,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
         glPatchParameteri(GL_PATCH_VERTICES, 4);TEST_OPENGL_ERROR();
 
         glDrawArrays(GL_PATCHES, 0, obj->get_vertices_number());
-        //glBindVertexArray(0);TEST_OPENGL_ERROR();
+        glBindVertexArray(0);TEST_OPENGL_ERROR();
         //glDrawArrays(GL_TRIANGLES, 0, obj->get_vertices_number());
         TEST_OPENGL_ERROR();
     }

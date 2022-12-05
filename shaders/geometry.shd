@@ -34,22 +34,22 @@ void main()
 {
     if (tce_out[0].display != 0)
     {
-        gs_out.color = tce_out[0].color;
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p2;
+        gs_out.color = vec3(1.0, 0.0, 0.0);
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p1;
         EmitVertex();
     
-        gs_out.color = tce_out[0].color;
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p3;
+        gs_out.color = vec3(0.0, 1.0, 0.0);
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p2;
         EmitVertex();
 
-        /*gs_out.color = tce_out[0].color;
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p4;
+        gs_out.color = vec3(0.0, 0.0, 1.0);
+        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p3;
         EmitVertex();
     
-        gs_out.color = tce_out[0].color;
-        gl_Position = projection_matrix * model_view_matrix * tce_out[0].p2;
-        EmitVertex();*/
-        
+        gs_out.color = vec3(1.0, 1.0, 0.0);
+        gl_Position = projection_matrix * model_view_matrix * tce_out[1].p4;
+        EmitVertex();
+
         EndPrimitive();
     }
     
