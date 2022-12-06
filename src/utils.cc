@@ -43,7 +43,7 @@ void test_opengl_error(std::string func, std::string file, int line)
 }
 
 void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
-              std::vector<glm::vec2> &uv, std::vector<glm::vec3> &normals)
+              std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals)
 {
     std::ifstream in(filename, std::ios::in);
     if (!in)
@@ -121,13 +121,72 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         }
         /* anything else is ignored */
     }
-
-    for (unsigned int i = 0; i < vertexIndices.size(); i++)
+    
+    //  Build a hash table that maps from a half-edge (expressed as a pair of indices, in order) to the third index of the triangle the half-edge belongs to.
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToTriangle;
+    for (unsigned int i = 0; i < vertexIndices.size(); i += 3)
     {
+        halfEdgeToTriangle[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = vertexIndices[i + 2];
+        halfEdgeToTriangle[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = vertexIndices[i];
+        halfEdgeToTriangle[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = vertexIndices[i + 1];
+    }
+
+    //  For each half-edge, find the other half-edge that shares the same triangle.
+    std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>> halfEdgeToHalfEdge;
+    for (auto it = halfEdgeToTriangle.begin(); it != halfEdgeToTriangle.end(); ++it)
+    {
+        unsigned int v1 = it->first.first;
+        unsigned int v2 = it->first.second;
+        unsigned int v3 = it->second;
+        halfEdgeToHalfEdge[it->first] = std::make_pair(v3, v1);
+        halfEdgeToHalfEdge[std::make_pair(v3, v1)] = std::make_pair(v2, v3);
+        halfEdgeToHalfEdge[std::make_pair(v2, v3)] = std::make_pair(v1, v2);
+    }
+
+    for (unsigned int i = 0; i < vertexIndices.size(); i+=3)
+    {
+        unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+        vertexIndex[0] = vertexIndices[i];
+        vertexIndex[1] = vertexIndices[i+1];
+        vertexIndex[2] = vertexIndices[i+2];
+        uvIndex[0] = uvIndices[i];
+        uvIndex[1] = uvIndices[i+1];
+        uvIndex[2] = uvIndices[i+2];
+        normalIndex[0] = normalIndices[i];
+        normalIndex[1] = normalIndices[i+1];
+        normalIndex[2] = normalIndices[i+2];
+
+        for (unsigned int j = 0; j < 3; j++)
+        {
+            //first vertex
+            glm::vec3 vertex = temp_vertices[vertexIndex[j]-1];
+            vertices.push_back(vertex);
+
+            // get half edge
+            std::pair<unsigned int, unsigned int> halfEdge = std::make_pair(vertexIndex[j], vertexIndex[(j+1)%3]);
+            std::pair<unsigned int, unsigned int> otherHalfEdge = halfEdgeToHalfEdge[halfEdge];
+
+            // adjacent vertex
+            unsigned int adjacentVertex_index = halfEdgeToTriangle[otherHalfEdge];
+            glm::vec3 adjacentVertex = temp_vertices[adjacentVertex_index-1];
+            vertices.push_back(adjacentVertex);
+
+            
+            glm::vec2 uv = temp_uv[uvIndex[j]-1];
+            uvs.push_back(uv);
+            uvs.push_back(temp_vertices[adjacentVertex_index-1]);
+
+
+            glm::vec3 normal = temp_normals[normalIndex[j]-1];
+            normals.push_back(normal);
+            normals.push_back(temp_normals[adjacentVertex_index-1]);
+        }
+        /*
         unsigned int vertexIndex = vertexIndices[i];
         glm::vec3 vertex = temp_vertices[vertexIndex - 1];
-        vertices.push_back(vertex);
+        vertices.push_back(vertex);*/
     }
+    /*
     for (unsigned int i = 0; i < normalIndices.size(); i++)
     {
         unsigned int normalIndex = normalIndices[i];
@@ -139,7 +198,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         unsigned int uvIndex = uvIndices[i];
         glm::vec2 vertex = temp_uv[uvIndex - 1];
         uv.push_back(vertex);
-    }
+    }*/
 }
 
 std::string read_file(const std::string &filename)

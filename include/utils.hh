@@ -13,6 +13,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 
 void test_opengl_error(std::string func, std::string file, int line);
 
@@ -23,7 +24,7 @@ void test_opengl_error(std::string func, std::string file, int line);
     } while (0)
 
 void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
-              std::vector<glm::vec2> &uv, std::vector<glm::vec3> &normals);
+              std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals);
 
 std::string read_file(const std::string &filename);
 
