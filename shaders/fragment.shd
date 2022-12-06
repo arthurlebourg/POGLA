@@ -2,7 +2,6 @@
 
 in GS_OUT {
     vec3 color;
-    vec2 uv;
 } gs_out;
 
 layout(location = 0) out vec4 output_color;

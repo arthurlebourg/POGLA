@@ -123,24 +123,23 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
     }
     
     //  Build a hash table that maps from a half-edge (expressed as a pair of indices, in order) to the third index of the triangle the half-edge belongs to.
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToTriangle;
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToVertex;
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToNormal;
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToUv;
+    
     for (unsigned int i = 0; i < vertexIndices.size(); i += 3)
     {
-        halfEdgeToTriangle[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = vertexIndices[i + 2];
-        halfEdgeToTriangle[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = vertexIndices[i];
-        halfEdgeToTriangle[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = vertexIndices[i + 1];
-    }
-
-    //  For each half-edge, find the other half-edge that shares the same triangle.
-    std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>> halfEdgeToHalfEdge;
-    for (auto it = halfEdgeToTriangle.begin(); it != halfEdgeToTriangle.end(); ++it)
-    {
-        unsigned int v1 = it->first.first;
-        unsigned int v2 = it->first.second;
-        unsigned int v3 = it->second;
-        halfEdgeToHalfEdge[it->first] = std::make_pair(v3, v1);
-        halfEdgeToHalfEdge[std::make_pair(v3, v1)] = std::make_pair(v2, v3);
-        halfEdgeToHalfEdge[std::make_pair(v2, v3)] = std::make_pair(v1, v2);
+        halfEdgeToVertex[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = vertexIndices[i + 2];
+        halfEdgeToNormal[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = normalIndices[i + 2];
+        halfEdgeToUv[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = uvIndices[i + 2];
+        
+        halfEdgeToVertex[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = vertexIndices[i];
+        halfEdgeToNormal[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = normalIndices[i];
+        halfEdgeToUv[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = uvIndices[i];
+        
+        halfEdgeToVertex[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = vertexIndices[i + 1];
+        halfEdgeToNormal[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = normalIndices[i + 1];
+        halfEdgeToUv[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = uvIndices[i + 1];
     }
 
     for (unsigned int i = 0; i < vertexIndices.size(); i+=3)
@@ -158,28 +157,26 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
 
         for (unsigned int j = 0; j < 3; j++)
         {
-            //first vertex
-            glm::vec3 vertex = temp_vertices[vertexIndex[j]-1];
-            vertices.push_back(vertex);
-
             // get half edge
-            std::pair<unsigned int, unsigned int> halfEdge = std::make_pair(vertexIndex[j], vertexIndex[(j+1)%3]);
-            std::pair<unsigned int, unsigned int> otherHalfEdge = halfEdgeToHalfEdge[halfEdge];
+            //std::pair<unsigned int, unsigned int> halfEdge = std::make_pair(vertexIndex[j], vertexIndex[(j+1)%3]);
+            std::pair<unsigned int, unsigned int> otherHalfEdge = std::make_pair(vertexIndex[(j+1)%3], vertexIndex[j]);
 
             // adjacent vertex
-            unsigned int adjacentVertex_index = halfEdgeToTriangle[otherHalfEdge];
-            glm::vec3 adjacentVertex = temp_vertices[adjacentVertex_index-1];
-            vertices.push_back(adjacentVertex);
+            unsigned int adjacentVertex_index = halfEdgeToVertex[otherHalfEdge];
+            vertices.push_back(temp_vertices[vertexIndex[j]-1]);
+            vertices.push_back(temp_vertices[adjacentVertex_index -1]);
 
             
+            unsigned int uv_index = halfEdgeToUv[otherHalfEdge];
             glm::vec2 uv = temp_uv[uvIndex[j]-1];
             uvs.push_back(uv);
-            uvs.push_back(temp_vertices[adjacentVertex_index-1]);
+            uvs.push_back(temp_vertices[uv_index-1]);
 
-
+            unsigned int normal_index = halfEdgeToNormal[otherHalfEdge];
             glm::vec3 normal = temp_normals[normalIndex[j]-1];
             normals.push_back(normal);
-            normals.push_back(temp_normals[adjacentVertex_index-1]);
+            normals.push_back(temp_normals[normal_index-1]);
+            //std::cout << "temp_normals[normal_index-1] = " << temp_normals[normal_index-1].x << " " << temp_normals[normal_index-1].y << " " << temp_normals[normal_index-1].z << std::endl;
         }
         /*
         unsigned int vertexIndex = vertexIndices[i];

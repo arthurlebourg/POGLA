@@ -15,7 +15,7 @@ uniform mat4 transform;
 void main()
 {
     vs_out.position = (transform * vec4(position, 1.0)).xyz;
-    vs_out.normal = normal * (transpose(inverse(mat3(transform))));
+    vs_out.normal = normal ;//* (transpose(inverse(mat3(transform))));
     vs_out.uv = uv;
     gl_Position = vec4(vs_out.position, 1.0);
 }
