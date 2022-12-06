@@ -15,7 +15,7 @@ Shader::Shader(std::string &vertex_shader_src, std::string &fragment_shader_src)
     std::string vertex_shader_content = read_file(vertex_shader_src);
     std::string fragment_shader_content = read_file(fragment_shader_src);
     //std::string tess_eval_shader_content = read_file("shaders/tess_eval.shd");
-    std::string geometry_shader_content = read_file("shaders/geometry.shd");
+    std::string geometry_shader_content = read_file("shaders/geometry_debug_normals.shd");
 
     char *vertex_shd_src =
         (char *)std::malloc(vertex_shader_content.length() * sizeof(char));

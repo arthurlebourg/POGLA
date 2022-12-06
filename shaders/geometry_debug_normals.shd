@@ -94,43 +94,4 @@ void main()
     gs_out.color = vec3(1.0, 1.0, 0.0);
     EmitVertex();
     EndPrimitive();
-    
-    /*
-    // check if dot1 and dot2 have the same sign
-    if (dot_main * dot1 <= 0.0) {
-        //Draw
-        gl_Position = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
-        gs_out.color = vec3(1.0, 0.0, 0.0);
-        EmitVertex();
-
-        gl_Position = projection_matrix * model_view_matrix * gl_in[2].gl_Position;
-        gs_out.color = vec3(1.0, 0.0, 0.0);
-        EmitVertex();
-        EndPrimitive();
-    }
-
-    if (dot_main * dot2 <= 0.0) {
-        //Draw
-        gl_Position = gl_in[2].gl_Position;
-        gl_Position = projection_matrix * model_view_matrix * gl_in[2].gl_Position;
-        gs_out.color = vec3(1.0, 0.0, 0.0);
-        EmitVertex();
-
-        gl_Position = projection_matrix * model_view_matrix * gl_in[4].gl_Position;
-        gs_out.color = vec3(1.0, 0.0, 0.0);
-        EmitVertex();
-        EndPrimitive();
-    }
-
-    if (dot_main * dot3 <= 0.0) {
-        //Draw
-        gl_Position = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
-        gs_out.color = vec3(1.0, 0.0, 0.0);
-        EmitVertex();
-
-        gl_Position = projection_matrix * model_view_matrix * gl_in[4].gl_Position;
-        gs_out.color = vec3(1.0, 0.0, 0.0);
-        EmitVertex();
-        EndPrimitive();
-    }*/
 }

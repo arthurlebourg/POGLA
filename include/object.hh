@@ -10,8 +10,6 @@
 class Object
 {
 public:
-    Object(const glm::vec3 position, const std::vector<glm::vec3> vertices);
-
     Object(const std::string obj_file, const std::string texture,
            const glm::vec3 position, const float obj_mass);
 
@@ -24,6 +22,8 @@ public:
     unsigned int get_VAO();
 
     unsigned int get_vertices_number();
+
+    unsigned int get_indices_number();
 
     btRigidBody *get_body();
 
@@ -48,10 +48,13 @@ private:
     glm::mat4 transform_;
     float mass_;
     unsigned int VAO_;
+    unsigned int EBO_;
     unsigned int vertices_number_;
+    unsigned int indices_number_;
     unsigned int texture_id_;
 
     std::vector<glm::vec3> vertices_;
+    std::vector<unsigned int> indices_;
     std::vector<glm::vec3> normals_;
     std::vector<glm::vec2> uv_;
     tifo::rgb24_image *texture_;

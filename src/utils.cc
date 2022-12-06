@@ -42,7 +42,7 @@ void test_opengl_error(std::string func, std::string file, int line)
     }
 }
 
-void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
+/*void load_obj(const char *filename, std::vector<glm::vec3> &vertices, std::vector<unsigned int> &indices,
               std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals)
 {
     std::ifstream in(filename, std::ios::in);
@@ -55,10 +55,6 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
     std::vector<unsigned int> uvIndices;
     std::vector<unsigned int> normalIndices;
 
-    std::vector<glm::vec3> temp_vertices;
-    std::vector<glm::vec3> temp_normals;
-    std::vector<glm::vec2> temp_uv;
-
     std::string line("");
     while (getline(in, line))
     {
@@ -69,7 +65,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             s >> v.x;
             s >> v.y;
             s >> v.z;
-            temp_vertices.push_back(v);
+            vertices.push_back(v);
         }
         else if (line.substr(0, 2) == "vt")
         {
@@ -77,7 +73,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             glm::vec2 v;
             s >> v.x;
             s >> v.y;
-            temp_uv.push_back(v);
+            uvs.push_back(v);
         }
         else if (line.substr(0, 2) == "vn")
         {
@@ -86,7 +82,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             s >> v.x;
             s >> v.y;
             s >> v.z;
-            temp_normals.push_back(v);
+            normals.push_back(v);
         }
         else if (line.substr(0, 2) == "f ")
         {
@@ -119,7 +115,6 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             normalIndices.push_back(normalIndex[2]);
             //normalIndices.push_back(normalIndex[3]);
         }
-        /* anything else is ignored */
     }
     
     //  Build a hash table that maps from a half-edge (expressed as a pair of indices, in order) to the third index of the triangle the half-edge belongs to.
@@ -157,45 +152,132 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
 
         for (unsigned int j = 0; j < 3; j++)
         {
-            // get half edge
-            //std::pair<unsigned int, unsigned int> halfEdge = std::make_pair(vertexIndex[j], vertexIndex[(j+1)%3]);
             std::pair<unsigned int, unsigned int> otherHalfEdge = std::make_pair(vertexIndex[(j+1)%3], vertexIndex[j]);
 
-            // adjacent vertex
             unsigned int adjacentVertex_index = halfEdgeToVertex[otherHalfEdge];
-            vertices.push_back(temp_vertices[vertexIndex[j]-1]);
-            vertices.push_back(temp_vertices[adjacentVertex_index -1]);
+            unsigned int adjacentNormal_index = halfEdgeToNormal[otherHalfEdge];
+            unsigned int adjacentUv_index = halfEdgeToUv[otherHalfEdge];
+            indices.push_back(vertexIndex[j]);
+            indices.push_back(normalIndex[j]);
+            indices.push_back(uvIndex[j]);
 
-            
-            unsigned int uv_index = halfEdgeToUv[otherHalfEdge];
-            glm::vec2 uv = temp_uv[uvIndex[j]-1];
-            uvs.push_back(uv);
-            uvs.push_back(temp_vertices[uv_index-1]);
-
-            unsigned int normal_index = halfEdgeToNormal[otherHalfEdge];
-            glm::vec3 normal = temp_normals[normalIndex[j]-1];
-            normals.push_back(normal);
-            normals.push_back(temp_normals[normal_index-1]);
-            //std::cout << "temp_normals[normal_index-1] = " << temp_normals[normal_index-1].x << " " << temp_normals[normal_index-1].y << " " << temp_normals[normal_index-1].z << std::endl;
+            indices.push_back(adjacentVertex_index);
+            indices.push_back(adjacentNormal_index);
+            indices.push_back(adjacentUv_index);
         }
-        /*
-        unsigned int vertexIndex = vertexIndices[i];
-        glm::vec3 vertex = temp_vertices[vertexIndex - 1];
-        vertices.push_back(vertex);*/
     }
-    /*
-    for (unsigned int i = 0; i < normalIndices.size(); i++)
+}*/
+
+void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
+              std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals, 
+              std::vector<unsigned int> &indices, std::vector<float> &vbo_data)
+{
+    std::ifstream file(filename);
+    std::string line;
+    using VertIndices = std::array<size_t, 3>;
+    std::vector<std::array<VertIndices, 3>> faces;
+
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToVertex;
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToNormal;
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToUv;
+    
+    while (file >> line)
     {
-        unsigned int normalIndex = normalIndices[i];
-        glm::vec3 vertex = temp_normals[normalIndex - 1];
-        normals.push_back(vertex);
+        GLfloat v1;
+        GLfloat v2;
+        GLfloat v3;
+        if (!line.compare("v"))
+        {
+            file >> v1 >> v2 >> v3;
+            vertices.push_back(glm::vec3(v1, v2, v3));
+        }
+        else if (!line.compare("vt"))
+        {
+            file >> v1 >> v2;
+            uvs.push_back(glm::vec2(v1, v2));
+        }
+        else if (!line.compare("vn"))
+        {
+            file >> v1 >> v2 >> v3;
+            normals.push_back(glm::vec3(v1, v2, v3));
+        }
+        else if (!line.compare("f"))
+        {
+            char slash; // unused
+            size_t v1, vn1, vt1, v2, vn2, vt2, v3, vn3, vt3;
+            file >> v1 >> slash >> vt1 >> slash >> vn1;
+            VertIndices vertices_indices1 = {v1 - 1, vt1 - 1, vn1 - 1};
+            file >> v2 >> slash >> vt2 >> slash >> vn2;
+            VertIndices vertices_indices2 = {v2 - 1, vt2 - 1, vn2 - 1};
+            file >> v3 >> slash >> vt3 >> slash >> vn3;
+            VertIndices vertices_indices3 = {v3 - 1, vt3 - 1, vn3 - 1};
+            std::array<VertIndices, 3> face = {vertices_indices1, vertices_indices2, vertices_indices3};
+            faces.push_back(face);
+            halfEdgeToVertex[std::make_pair(v1, v2)] = v3;
+            halfEdgeToNormal[std::make_pair(v1, v2)] = vn3;
+            halfEdgeToUv[std::make_pair(v1, v2)] = vt3;
+
+            halfEdgeToVertex[std::make_pair(v2, v3)] = v1;
+            halfEdgeToNormal[std::make_pair(v2, v3)] = vn1;
+            halfEdgeToUv[std::make_pair(v2, v3)] = vt1;
+
+            halfEdgeToVertex[std::make_pair(v3, v1)] = v2;
+            halfEdgeToNormal[std::make_pair(v3, v1)] = vn2;
+            halfEdgeToUv[std::make_pair(v3, v1)] = vt2;
+        }
     }
-    for (unsigned int i = 0; i < uvIndices.size(); i++)
+
+    std::map<VertIndices, size_t> index_translator;
+
+    size_t i = 0;
+    for (const auto &face : faces)
     {
-        unsigned int uvIndex = uvIndices[i];
-        glm::vec2 vertex = temp_uv[uvIndex - 1];
-        uv.push_back(vertex);
-    }*/
+        unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+        vertexIndex[0] = face[0][0];
+        vertexIndex[1] = face[1][0];
+        vertexIndex[2] = face[2][0];
+        uvIndex[0] = face[0][1];
+        uvIndex[1] = face[1][1];
+        uvIndex[2] = face[2][1];
+        normalIndex[0] = face[0][2];
+        normalIndex[1] = face[1][2];
+        normalIndex[2] = face[2][2];
+        //for (const auto &vert_indices : face)
+        for (unsigned int j = 0; j < 3; j++)
+        {
+            auto result = index_translator.insert({face[j], i});
+            if (result.second)
+            {
+                std::pair<unsigned int, unsigned int> otherHalfEdge =
+                    std::make_pair(vertexIndex[(j + 1) % 3], vertexIndex[j]);
+
+                unsigned int adjacentVertex_index =
+                    halfEdgeToVertex[otherHalfEdge];
+                unsigned int adjacentNormal_index =
+                    halfEdgeToNormal[otherHalfEdge];
+                unsigned int adjacentUv_index = halfEdgeToUv[otherHalfEdge];
+                vbo_data.push_back(vertices[vertexIndex[j]].x);
+                vbo_data.push_back(vertices[vertexIndex[j]].y);
+                vbo_data.push_back(vertices[vertexIndex[j]].z);
+                vbo_data.push_back(normals[normalIndex[j]].x);
+                vbo_data.push_back(normals[normalIndex[j]].y);
+                vbo_data.push_back(normals[normalIndex[j]].z);
+                vbo_data.push_back(uvs[uvIndex[j]].x);
+                vbo_data.push_back(uvs[uvIndex[j]].y);
+
+                vbo_data.push_back(vertices[adjacentVertex_index].x);
+                vbo_data.push_back(vertices[adjacentVertex_index].y);
+                vbo_data.push_back(vertices[adjacentVertex_index].z);
+                vbo_data.push_back(normals[adjacentNormal_index].x);
+                vbo_data.push_back(normals[adjacentNormal_index].y);
+                vbo_data.push_back(normals[adjacentNormal_index].z);
+                vbo_data.push_back(uvs[adjacentUv_index].x);
+                vbo_data.push_back(uvs[adjacentUv_index].y);
+                i+=2;
+            }
+            indices.push_back(result.first->second);
+        }
+    }
 }
 
 std::string read_file(const std::string &filename)
