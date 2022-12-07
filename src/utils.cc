@@ -206,13 +206,15 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             char slash; // unused
             size_t v1, vn1, vt1, v2, vn2, vt2, v3, vn3, vt3;
             file >> v1 >> slash >> vt1 >> slash >> vn1;
-            VertIndices vertices_indices1 = {v1 - 1, vt1 - 1, vn1 - 1};
+            VertIndices vertices_indices1 = {--v1, --vt1, --vn1};
             file >> v2 >> slash >> vt2 >> slash >> vn2;
-            VertIndices vertices_indices2 = {v2 - 1, vt2 - 1, vn2 - 1};
+            VertIndices vertices_indices2 = {--v2, --vt2, --vn2};
             file >> v3 >> slash >> vt3 >> slash >> vn3;
-            VertIndices vertices_indices3 = {v3 - 1, vt3 - 1, vn3 - 1};
+            VertIndices vertices_indices3 = {--v3, --vt3, --vn3};
             std::array<VertIndices, 3> face = {vertices_indices1, vertices_indices2, vertices_indices3};
             faces.push_back(face);
+            // print vn
+            //std::cout << "vn1: " << vn1 << " vn2: " << vn2 << " vn3: " << vn3 << std::endl;
             halfEdgeToVertex[std::make_pair(v1, v2)] = v3;
             halfEdgeToNormal[std::make_pair(v1, v2)] = vn3;
             halfEdgeToUv[std::make_pair(v1, v2)] = vt3;
@@ -258,9 +260,10 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 unsigned int adjacentUv_index = halfEdgeToUv[otherHalfEdge];
                 vbo_data.push_back(vertices[vertexIndex[j]].x);
                 vbo_data.push_back(vertices[vertexIndex[j]].y);
-                vbo_data.push_back(vertices[vertexIndex[j]].z);
+                vbo_data.push_back(vertices[vertexIndex[j]].z); 
                 vbo_data.push_back(normals[normalIndex[j]].x);
                 vbo_data.push_back(normals[normalIndex[j]].y);
+                //std::cout << "index: " << normalIndex[j] << " normal: " << normals[normalIndex[j]].x << " " << normals[normalIndex[j]].y << " " << normals[normalIndex[j]].z << std::endl;
                 vbo_data.push_back(normals[normalIndex[j]].z);
                 vbo_data.push_back(uvs[uvIndex[j]].x);
                 vbo_data.push_back(uvs[uvIndex[j]].y);
@@ -270,6 +273,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 vbo_data.push_back(vertices[adjacentVertex_index].z);
                 vbo_data.push_back(normals[adjacentNormal_index].x);
                 vbo_data.push_back(normals[adjacentNormal_index].y);
+                //std::cout << "index: " << adjacentNormal_index << " adjacent_normal: " << normals[adjacentNormal_index].x << " " << normals[adjacentNormal_index].y << " " << normals[adjacentNormal_index].z << std::endl;
                 vbo_data.push_back(normals[adjacentNormal_index].z);
                 vbo_data.push_back(uvs[adjacentUv_index].x);
                 vbo_data.push_back(uvs[adjacentUv_index].y);

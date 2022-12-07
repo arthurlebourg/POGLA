@@ -22,10 +22,10 @@ int main()
         std::make_shared<Player>(glm::vec3(0, 10, 0.0), glm::vec3(0, 0, -1));
     scene->add_player(player);
     scene->add_object(std::make_shared<Object>(plane));
-    scene->add_object(std::make_shared<Object>(amogus));
     scene->add_object(std::make_shared<Object>(cube));
+    scene->add_object(std::make_shared<Object>(amogus));
 
-    scene->get_objs()[2]->tag = "cube";
+    scene->get_objs()[1]->tag = "cube";
 
 
     //std::shared_ptr<Program> prog = std::make_shared<Program>(
