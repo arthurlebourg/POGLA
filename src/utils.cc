@@ -263,8 +263,8 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 vbo_data.push_back(vertices[vertexIndex[j]].z); 
                 vbo_data.push_back(normals[normalIndex[j]].x);
                 vbo_data.push_back(normals[normalIndex[j]].y);
-                //std::cout << "index: " << normalIndex[j] << " normal: " << normals[normalIndex[j]].x << " " << normals[normalIndex[j]].y << " " << normals[normalIndex[j]].z << std::endl;
                 vbo_data.push_back(normals[normalIndex[j]].z);
+                //std::cout << "index: " << normalIndex[j] << " normal: " << normals[normalIndex[j]].x << " " << normals[normalIndex[j]].y << " " << normals[normalIndex[j]].z << std::endl;
                 vbo_data.push_back(uvs[uvIndex[j]].x);
                 vbo_data.push_back(uvs[uvIndex[j]].y);
 
@@ -273,8 +273,8 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 vbo_data.push_back(vertices[adjacentVertex_index].z);
                 vbo_data.push_back(normals[adjacentNormal_index].x);
                 vbo_data.push_back(normals[adjacentNormal_index].y);
-                //std::cout << "index: " << adjacentNormal_index << " adjacent_normal: " << normals[adjacentNormal_index].x << " " << normals[adjacentNormal_index].y << " " << normals[adjacentNormal_index].z << std::endl;
                 vbo_data.push_back(normals[adjacentNormal_index].z);
+                //std::cout << "index: " << adjacentNormal_index << " adjacent_normal: " << normals[adjacentNormal_index].x << " " << normals[adjacentNormal_index].y << " " << normals[adjacentNormal_index].z << std::endl;
                 vbo_data.push_back(uvs[adjacentUv_index].x);
                 vbo_data.push_back(uvs[adjacentUv_index].y);
                 i+=2;
