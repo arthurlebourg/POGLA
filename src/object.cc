@@ -64,7 +64,6 @@ Object::Object(const std::string obj_file, const std::string texture,
     std::cout << "vertices size: " << vertices_.size() << std::endl;
     for (auto i : vertices_)
     {
-        //std::cout << "bite: " << count++ << std::endl;
         shape->addPoint(btVector3(i.x, i.y, i.z));
     }
     shape->optimizeConvexHull();

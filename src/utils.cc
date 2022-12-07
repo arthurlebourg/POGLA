@@ -276,6 +276,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 i+=2;
             }
             indices.push_back(result.first->second);
+            indices.push_back(result.first->second + 1);
         }
     }
 }
