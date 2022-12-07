@@ -1,12 +1,12 @@
 #include "player.hh"
 
 Player::Player(const glm::vec3 position, const glm::vec3 direction)
-    : yaw_(60.0)
+    : yaw_(90.0)
     , pitch_(0.0)
     , position_(position)
     , direction_(direction)
     , up_(glm::vec3(0, 1, 0))
-    , projection_(glm::frustum(-0.02, 0.02, -0.01, 0.01, 0.01, 250.0))
+    , projection_(glm::frustum(-0.01, 0.01, -0.01, 0.01, 0.01, 300.0))
     , speed_(800.0f)
     , walk_(speed_)
     , sprint_(2.5 * speed_)
