@@ -174,8 +174,9 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
 {
     std::ifstream file(filename);
     std::string line;
-    using VertIndices = std::array<size_t, 3>;
-    std::vector<std::array<VertIndices, 3>> faces;
+    std::vector<unsigned int> vertexIndices;
+    std::vector<unsigned int> uvIndices;
+    std::vector<unsigned int> normalIndices;
 
     std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToVertex;
     std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToNormal;
@@ -206,15 +207,26 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             char slash; // unused
             size_t v1, vn1, vt1, v2, vn2, vt2, v3, vn3, vt3;
             file >> v1 >> slash >> vt1 >> slash >> vn1;
-            VertIndices vertices_indices1 = {--v1, --vt1, --vn1};
+            v1--;
+            vt1--;
+            vn1--;
             file >> v2 >> slash >> vt2 >> slash >> vn2;
-            VertIndices vertices_indices2 = {--v2, --vt2, --vn2};
+            v2--;
+            vt2--;
+            vn2--;
             file >> v3 >> slash >> vt3 >> slash >> vn3;
-            VertIndices vertices_indices3 = {--v3, --vt3, --vn3};
-            std::array<VertIndices, 3> face = {vertices_indices1, vertices_indices2, vertices_indices3};
-            faces.push_back(face);
-            // print vn
-            //std::cout << "vn1: " << vn1 << " vn2: " << vn2 << " vn3: " << vn3 << std::endl;
+            v3--;
+            vt3--;
+            vn3--;
+            vertexIndices.push_back(v1);
+            vertexIndices.push_back(v2);
+            vertexIndices.push_back(v3);
+            uvIndices.push_back(vt1);
+            uvIndices.push_back(vt2);
+            uvIndices.push_back(vt3);
+            normalIndices.push_back(vn1);
+            normalIndices.push_back(vn2);
+            normalIndices.push_back(vn3);
             halfEdgeToVertex[std::make_pair(v1, v2)] = v3;
             halfEdgeToNormal[std::make_pair(v1, v2)] = vn3;
             halfEdgeToUv[std::make_pair(v1, v2)] = vt3;
@@ -229,58 +241,47 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         }
     }
 
-    std::map<VertIndices, size_t> index_translator;
-
-    size_t i = 0;
-    for (const auto &face : faces)
+    int counter_index = 0;
+    for (unsigned int i = 0; i < vertexIndices.size(); i+=3)
     {
         unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-        vertexIndex[0] = face[0][0];
-        vertexIndex[1] = face[1][0];
-        vertexIndex[2] = face[2][0];
-        uvIndex[0] = face[0][1];
-        uvIndex[1] = face[1][1];
-        uvIndex[2] = face[2][1];
-        normalIndex[0] = face[0][2];
-        normalIndex[1] = face[1][2];
-        normalIndex[2] = face[2][2];
-        //for (const auto &vert_indices : face)
+        vertexIndex[0] = vertexIndices[i];
+        vertexIndex[1] = vertexIndices[i+1];
+        vertexIndex[2] = vertexIndices[i+2];
+        uvIndex[0] = uvIndices[i];
+        uvIndex[1] = uvIndices[i+1];
+        uvIndex[2] = uvIndices[i+2];
+        normalIndex[0] = normalIndices[i];
+        normalIndex[1] = normalIndices[i+1];
+        normalIndex[2] = normalIndices[i+2];
+
         for (unsigned int j = 0; j < 3; j++)
         {
-            auto result = index_translator.insert({face[j], i});
-            if (result.second)
-            {
-                std::pair<unsigned int, unsigned int> otherHalfEdge =
-                    std::make_pair(vertexIndex[(j + 1) % 3], vertexIndex[j]);
+            std::pair<unsigned int, unsigned int> otherHalfEdge = std::make_pair(vertexIndex[(j+1)%3], vertexIndex[j]);
 
-                unsigned int adjacentVertex_index =
-                    halfEdgeToVertex[otherHalfEdge];
-                unsigned int adjacentNormal_index =
-                    halfEdgeToNormal[otherHalfEdge];
-                unsigned int adjacentUv_index = halfEdgeToUv[otherHalfEdge];
-                vbo_data.push_back(vertices[vertexIndex[j]].x);
-                vbo_data.push_back(vertices[vertexIndex[j]].y);
-                vbo_data.push_back(vertices[vertexIndex[j]].z); 
-                vbo_data.push_back(normals[normalIndex[j]].x);
-                vbo_data.push_back(normals[normalIndex[j]].y);
-                vbo_data.push_back(normals[normalIndex[j]].z);
-                //std::cout << "index: " << normalIndex[j] << " normal: " << normals[normalIndex[j]].x << " " << normals[normalIndex[j]].y << " " << normals[normalIndex[j]].z << std::endl;
-                vbo_data.push_back(uvs[uvIndex[j]].x);
-                vbo_data.push_back(uvs[uvIndex[j]].y);
+            unsigned int adjacentVertex_index = halfEdgeToVertex[otherHalfEdge];
+            unsigned int adjacentNormal_index = halfEdgeToNormal[otherHalfEdge];
+            unsigned int adjacentUv_index = halfEdgeToUv[otherHalfEdge];
+            vbo_data.push_back(vertices[vertexIndex[j]].x);
+            vbo_data.push_back(vertices[vertexIndex[j]].y);
+            vbo_data.push_back(vertices[vertexIndex[j]].z);
+            vbo_data.push_back(normals[normalIndex[j]].x);
+            vbo_data.push_back(normals[normalIndex[j]].y);
+            vbo_data.push_back(normals[normalIndex[j]].z);
+            vbo_data.push_back(uvs[uvIndex[j]].x);
+            vbo_data.push_back(uvs[uvIndex[j]].y);
 
-                vbo_data.push_back(vertices[adjacentVertex_index].x);
-                vbo_data.push_back(vertices[adjacentVertex_index].y);
-                vbo_data.push_back(vertices[adjacentVertex_index].z);
-                vbo_data.push_back(normals[adjacentNormal_index].x);
-                vbo_data.push_back(normals[adjacentNormal_index].y);
-                vbo_data.push_back(normals[adjacentNormal_index].z);
-                //std::cout << "index: " << adjacentNormal_index << " adjacent_normal: " << normals[adjacentNormal_index].x << " " << normals[adjacentNormal_index].y << " " << normals[adjacentNormal_index].z << std::endl;
-                vbo_data.push_back(uvs[adjacentUv_index].x);
-                vbo_data.push_back(uvs[adjacentUv_index].y);
-                i+=2;
-            }
-            indices.push_back(result.first->second);
-            indices.push_back(result.first->second + 1);
+            indices.push_back(counter_index++);
+
+            vbo_data.push_back(vertices[adjacentVertex_index].x);
+            vbo_data.push_back(vertices[adjacentVertex_index].y);
+            vbo_data.push_back(vertices[adjacentVertex_index].z);
+            vbo_data.push_back(normals[adjacentNormal_index].x);
+            vbo_data.push_back(normals[adjacentNormal_index].y);
+            vbo_data.push_back(normals[adjacentNormal_index].z);
+            vbo_data.push_back(uvs[adjacentUv_index].x);
+            vbo_data.push_back(uvs[adjacentUv_index].y);
+            indices.push_back(counter_index++);
         }
     }
 }

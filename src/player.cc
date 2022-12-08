@@ -132,10 +132,8 @@ void Player::move(const int forward, const int sideward, const float deltaTime)
     glm::vec3 right = glm::normalize(glm::cross(direction_, up_));
     //get forward vector from model view matrix
     glm::vec3 forwardvec = glm::normalize(glm::cross(up_, right));
-
-    glm::vec3 dir = forward * speed_ * deltaTime * forwardvec
-        + sideward * speed_ * deltaTime
-            * right;
+    
+    glm::vec3 dir = speed_ * deltaTime * ((float)forward * forwardvec + (float)sideward * right);
     vel.setX(dir.x);
     vel.setZ(dir.z);
     body_->setLinearVelocity(vel);
