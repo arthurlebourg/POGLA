@@ -123,40 +123,19 @@ btRigidBody *Player::get_body()
     return body_;
 }
 
-float calculate_angleRotX(glm::vec3 direction)
-{
-    auto direction_along_z = glm::vec3(direction.x, 0, direction.z);
-    auto norm_dir = sqrt(direction.x * direction.x + direction.y * direction.y
-                         + direction.z * direction.z);
-    auto norm_z = sqrt(direction_along_z.x * direction_along_z.x
-                       + direction_along_z.y * direction_along_z.y
-                       + direction_along_z.z * direction_along_z.z);
-    return acos(glm::dot(direction, direction_along_z) / (norm_dir * norm_z));
-}
-
-glm::vec3 apply_rotation(const glm::vec3 direction, const float angle)
-{
-    auto rotation = glm::mat3(1, 0, 0, 0, cos(angle), -sin(angle), 0,
-                              sin(angle), cos(angle));
-    return rotation * direction;
-}
-
 void Player::move(const int forward, const int sideward, const float deltaTime)
 {
     body_->activate();
     btVector3 vel = body_->getLinearVelocity();
 
-    // angleRotX = angle(playerLookingDirection,
-    // playerLookingStraightForwardDirection) = angle(direction_,
-    // direction_along_z)
-    auto angleRotX = calculate_angleRotX(direction_);
-    // rotate looking direction to moving direction
-    auto correctedDir = apply_rotation(direction_, angleRotX);
+    //get right vector from model view matrix
+    glm::vec3 right = glm::normalize(glm::cross(direction_, up_));
+    //get forward vector from model view matrix
+    glm::vec3 forwardvec = glm::normalize(glm::cross(up_, right));
 
-    glm::vec3 dir = forward * speed_ * deltaTime * correctedDir
+    glm::vec3 dir = forward * speed_ * deltaTime * forwardvec
         + sideward * speed_ * deltaTime
-            * glm::normalize(glm::cross(correctedDir, up_));
-
+            * right;
     vel.setX(dir.x);
     vel.setZ(dir.z);
     body_->setLinearVelocity(vel);
