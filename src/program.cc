@@ -111,7 +111,7 @@ void Program::display()
                                    deltaTime);
 
         render(scene_->get_player()->get_model_view(),
-               scene_->get_player()->get_projection());
+               scene_->get_player()->get_projection(), deltaTime);
 
         processInput(window_);
 
@@ -214,7 +214,7 @@ GLFWwindow *Program::get_window()
 }
 
 void Program::render(glm::mat4 const &model_view_matrix,
-                     glm::mat4 const &projection_matrix)
+                     glm::mat4 const &projection_matrix, float deltaTime)
 {
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     glClear(
@@ -224,8 +224,12 @@ void Program::render(glm::mat4 const &model_view_matrix,
     render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
     render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);
     render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);
-    //render_shader_.set_vec3_uniform("cam_pos",
-    //                                model_view_matrix * glm::vec4(0, 0, 0, 1));
+
+
+    if ((int)deltaTime % 3 < 0.5f)
+    {
+        seed_ = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    }
 
     for (auto obj : scene_->get_objs())
     {
@@ -242,9 +246,12 @@ void Program::render(glm::mat4 const &model_view_matrix,
         render_shader_.bind_texture(obj);TEST_OPENGL_ERROR();
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
+        render_shader_.set_float_uniform("seed", seed_);
 
         glLineWidth(5.0f);
         TEST_OPENGL_ERROR();
+        //glPatchParameteri(GL_PATCH_VERTICES, 4);
+        //glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT, 0);
         glDrawElements(GL_TRIANGLES_ADJACENCY, obj->get_indices_number(), GL_UNSIGNED_INT, 0);
         TEST_OPENGL_ERROR();
         

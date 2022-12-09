@@ -1,7 +1,7 @@
 #version 450
 
 // put the layout for lines
-layout(triangles, equal_spacing, ccw) in;
+layout(patches, equal_spacing, ccw) in;
 
 in VS_OUT {
     vec3 position;

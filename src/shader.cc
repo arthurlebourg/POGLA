@@ -280,6 +280,12 @@ void Shader::set_mat4_uniform(const char *name, glm::mat4 mat)
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
+void Shader::set_float_uniform(const char *name, float x)
+{
+    GLint location = glGetUniformLocation(shader_program_, name);
+    glUniform1f(location, x);
+}
+
 void Shader::set_mat4_uniform(const char *name, btScalar *mat)
 {
     float res[16];
