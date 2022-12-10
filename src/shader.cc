@@ -126,10 +126,10 @@ Shader::Shader(std::string &vertex_shader_src, std::string &fragment_shader_src,
     GLuint shader_id[5];
     
     shader_id[0] = glCreateShader(GL_VERTEX_SHADER);
-    shader_id[1] = glCreateShader(GL_FRAGMENT_SHADER);
-    shader_id[2] = glCreateShader(GL_GEOMETRY_SHADER);
-    shader_id[3] = glCreateShader(GL_TESS_CONTROL_SHADER);
-    shader_id[4] = glCreateShader(GL_TESS_EVALUATION_SHADER);
+    shader_id[1] = glCreateShader(GL_TESS_CONTROL_SHADER);
+    shader_id[2] = glCreateShader(GL_TESS_EVALUATION_SHADER);
+    shader_id[3] = glCreateShader(GL_GEOMETRY_SHADER);
+    shader_id[4] = glCreateShader(GL_FRAGMENT_SHADER);
 
     std::string vertex_shader_content = read_file(vertex_shader_src);
     std::string fragment_shader_content = read_file(fragment_shader_src);
@@ -140,34 +140,34 @@ Shader::Shader(std::string &vertex_shader_src, std::string &fragment_shader_src,
 
     char *vertex_shd_src =
         (char *)std::malloc(vertex_shader_content.length() * sizeof(char));
-    char *fragment_shd_src =
-        (char *)std::malloc(fragment_shader_content.length() * sizeof(char));
-    char *geometry_shd_src =
-        (char *)std::malloc(geometry_shader_content.length() * sizeof(char));
     char *tess_control_shd_src = (char *)std::malloc(
         tess_control_shader_content.length() * sizeof(char));
     char *tess_eval_shd_src =
         (char *)std::malloc(tess_eval_shader_content.length() * sizeof(char));
+    char *geometry_shd_src =
+        (char *)std::malloc(geometry_shader_content.length() * sizeof(char));
+    char *fragment_shd_src =
+        (char *)std::malloc(fragment_shader_content.length() * sizeof(char));
 
     vertex_shader_content.copy(vertex_shd_src, vertex_shader_content.length());
-    fragment_shader_content.copy(fragment_shd_src,
-                                 fragment_shader_content.length());
-    
-    geometry_shader_content.copy(geometry_shd_src,
-                                 geometry_shader_content.length());
     tess_control_shader_content.copy(tess_control_shd_src,
                                      tess_control_shader_content.length());
     tess_eval_shader_content.copy(tess_eval_shd_src,
                                   tess_eval_shader_content.length());
+    geometry_shader_content.copy(geometry_shd_src,
+                                 geometry_shader_content.length());
+    fragment_shader_content.copy(fragment_shd_src,
+                                 fragment_shader_content.length());
+    
 
     glShaderSource(shader_id[0], 1, (const GLchar **)&(vertex_shd_src), NULL);
-    glShaderSource(shader_id[1], 1, (const GLchar **)&(fragment_shd_src),
+    glShaderSource(shader_id[1], 1, (const GLchar **)&(tess_control_shd_src),
                    NULL);
-    glShaderSource(shader_id[2], 1, (const GLchar **)&(geometry_shd_src),
+    glShaderSource(shader_id[2], 1, (const GLchar **)&(tess_eval_shd_src),
                    NULL);
-    glShaderSource(shader_id[3], 1, (const GLchar **)&(tess_control_shd_src),
+    glShaderSource(shader_id[3], 1, (const GLchar **)&(geometry_shd_src),
                    NULL);
-    glShaderSource(shader_id[4], 1, (const GLchar **)&(tess_eval_shd_src),
+    glShaderSource(shader_id[4], 1, (const GLchar **)&(fragment_shd_src),
                    NULL);
 
     for (int i = 0; i < 5; i++)

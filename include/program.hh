@@ -47,8 +47,8 @@ private:
 
     bool ready_;
 
-    float seed_ = 0.0f;
-    float time_to_update_seed_ = 1.0 / 12.0f;
+    float nb_of_updates_per_seconds_ = 24.0f; // 24 updates per seconds or 12 updates per seconds (stop motion standard)
+    float time_to_update_seed_ = 1.0 / nb_of_updates_per_seconds_;
 };
 
 void set_prog_var(std::shared_ptr<Program> p);

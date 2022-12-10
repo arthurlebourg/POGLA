@@ -30,12 +30,12 @@ int main()
     scene->get_objs()[1]->tag = "cube";
 
 
-    //std::shared_ptr<Program> prog = std::make_shared<Program>(
-    //    shd_vertex, shd_fragment, shd_geometry, shd_tess_control, shd_tess_eval,
-    //    window, scene);
-
     std::shared_ptr<Program> prog = std::make_shared<Program>(
-        shd_vertex, shd_fragment, window, scene);
+        shd_vertex, shd_fragment, shd_geometry, shd_tess_control, shd_tess_eval,
+        window, scene);
+
+    //std::shared_ptr<Program> prog = std::make_shared<Program>(
+    //    shd_vertex, shd_fragment, window, scene);
 
     set_prog_var(prog);
     if (!prog->is_ready())

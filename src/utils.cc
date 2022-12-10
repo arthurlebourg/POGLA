@@ -282,6 +282,28 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(uvs[adjacentUv_index].x);
             vbo_data.push_back(uvs[adjacentUv_index].y);
             indices.push_back(counter_index++);
+            
+            vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].x);
+            vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].y);
+            vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].z);
+            vbo_data.push_back(normals[normalIndex[(j+1)%3]].x);
+            vbo_data.push_back(normals[normalIndex[(j+1)%3]].y);
+            vbo_data.push_back(normals[normalIndex[(j+1)%3]].z);
+            vbo_data.push_back(uvs[uvIndex[(j+1)%3]].x);
+            vbo_data.push_back(uvs[uvIndex[(j+1)%3]].y);
+
+            indices.push_back(counter_index++);
+            
+            vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].x);
+            vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].y);
+            vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].z);
+            vbo_data.push_back(normals[normalIndex[(j+2)%3]].x);
+            vbo_data.push_back(normals[normalIndex[(j+2)%3]].y);
+            vbo_data.push_back(normals[normalIndex[(j+2)%3]].z);
+            vbo_data.push_back(uvs[uvIndex[(j+2)%3]].x);
+            vbo_data.push_back(uvs[uvIndex[(j+2)%3]].y);
+
+            indices.push_back(counter_index++);
         }
     }
 }
