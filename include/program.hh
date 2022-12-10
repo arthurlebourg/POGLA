@@ -36,7 +36,7 @@ public:
     void update_position();
 
     void render(glm::mat4 const &model_view_matrix,
-                glm::mat4 const &projection_matrix, float deltaTime);
+                glm::mat4 const &projection_matrix, float currentTime);
 
 private:
     std::shared_ptr<Scene> scene_;
@@ -48,6 +48,7 @@ private:
     bool ready_;
 
     float seed_ = 0.0f;
+    float time_to_update_seed_ = 1.0 / 12.0f;
 };
 
 void set_prog_var(std::shared_ptr<Program> p);

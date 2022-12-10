@@ -226,10 +226,13 @@ void Program::render(glm::mat4 const &model_view_matrix,
     render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);
 
 
-    if ((int)deltaTime % 3 < 0.5f)
+    if (time_to_update_seed_ <= 0.0)
     {
+        time_to_update_seed_ = 1.0 / 12.0;
         seed_ = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        render_shader_.set_float_uniform("seed", seed_);
     }
+    time_to_update_seed_ -= deltaTime;
 
     for (auto obj : scene_->get_objs())
     {
@@ -246,7 +249,6 @@ void Program::render(glm::mat4 const &model_view_matrix,
         render_shader_.bind_texture(obj);TEST_OPENGL_ERROR();
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
-        render_shader_.set_float_uniform("seed", seed_);
 
         glLineWidth(5.0f);
         TEST_OPENGL_ERROR();
