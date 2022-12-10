@@ -5,7 +5,7 @@ layout(vertices = 2) out;
 in VS_OUT {
     vec3 normal;
     vec2 uv;
-} vs_out[]; // 1 is the adjencent vertex
+} vs_out[]; // 2 is the adjencent vertex
 
 out TCS_OUT {
     vec3 normal;
@@ -17,10 +17,10 @@ uniform mat4 projection_matrix;
 
 void main()
 {
-    vec3 normal_main = normalize(vs_out[0].normal);// + vs_out[2].normal + vs_out[3].normal);
-    vec3 normal_adj = normalize(vs_out[1].normal);
+    vec3 normal_main = normalize(vs_out[0].normal + vs_out[1].normal + vs_out[3].normal);
+    vec3 normal_adj = normalize(/*vs_out[0].normal + vs_out[1].normal + */vs_out[2].normal);
 
-    vec3 center_main = (gl_in[0].gl_Position.xyz + gl_in[2].gl_Position.xyz + gl_in[3].gl_Position.xyz) / 3.0;
+    vec3 center_main = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[3].gl_Position.xyz) / 3.0;
     vec3 center_adj = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0;
     
     vec3 cam_pos = vec3(inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0));
@@ -31,16 +31,14 @@ void main()
     
     if (dot_main * dot_adj > 0)
     {
+        gl_TessLevelOuter[0] = 0.0;
+        gl_TessLevelOuter[1] = 0.0;
+
         return;
     }
 
-    gl_TessLevelOuter[0] = 1.0;
-    gl_TessLevelOuter[1] = 1.0;
-    gl_TessLevelOuter[2] = 1.0;
-    gl_TessLevelOuter[3] = 1.0;
-
-    gl_TessLevelInner[0] = 1.0;
-    gl_TessLevelInner[1] = 1.0;
+    gl_TessLevelOuter[0] = 5.0;
+    gl_TessLevelOuter[1] = 5.0;
 
     tcs_out[gl_InvocationID].normal = vs_out[gl_InvocationID].normal;
     tcs_out[gl_InvocationID].uv = vs_out[gl_InvocationID].uv;

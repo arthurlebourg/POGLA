@@ -240,6 +240,8 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             halfEdgeToUv[std::make_pair(v3, v1)] = vt2;
         }
     }
+    
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> pushed_vertices;
 
     int counter_index = 0;
     for (unsigned int i = 0; i < vertexIndices.size(); i+=3)
@@ -273,6 +275,17 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
 
             indices.push_back(counter_index++);
 
+            vbo_data.push_back(vertices[vertexIndex[(j + 1) % 3]].x);
+            vbo_data.push_back(vertices[vertexIndex[(j + 1) % 3]].y);
+            vbo_data.push_back(vertices[vertexIndex[(j + 1) % 3]].z);
+            vbo_data.push_back(normals[normalIndex[(j + 1) % 3]].x);
+            vbo_data.push_back(normals[normalIndex[(j + 1) % 3]].y);
+            vbo_data.push_back(normals[normalIndex[(j + 1) % 3]].z);
+            vbo_data.push_back(uvs[uvIndex[(j + 1) % 3]].x);
+            vbo_data.push_back(uvs[uvIndex[(j + 1) % 3]].y);
+
+            indices.push_back(counter_index++);
+            
             vbo_data.push_back(vertices[adjacentVertex_index].x);
             vbo_data.push_back(vertices[adjacentVertex_index].y);
             vbo_data.push_back(vertices[adjacentVertex_index].z);
@@ -281,29 +294,99 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(normals[adjacentNormal_index].z);
             vbo_data.push_back(uvs[adjacentUv_index].x);
             vbo_data.push_back(uvs[adjacentUv_index].y);
-            indices.push_back(counter_index++);
-            
-            vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].x);
-            vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].y);
-            vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].z);
-            vbo_data.push_back(normals[normalIndex[(j+1)%3]].x);
-            vbo_data.push_back(normals[normalIndex[(j+1)%3]].y);
-            vbo_data.push_back(normals[normalIndex[(j+1)%3]].z);
-            vbo_data.push_back(uvs[uvIndex[(j+1)%3]].x);
-            vbo_data.push_back(uvs[uvIndex[(j+1)%3]].y);
 
             indices.push_back(counter_index++);
-            
-            vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].x);
-            vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].y);
-            vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].z);
-            vbo_data.push_back(normals[normalIndex[(j+2)%3]].x);
-            vbo_data.push_back(normals[normalIndex[(j+2)%3]].y);
-            vbo_data.push_back(normals[normalIndex[(j+2)%3]].z);
-            vbo_data.push_back(uvs[uvIndex[(j+2)%3]].x);
-            vbo_data.push_back(uvs[uvIndex[(j+2)%3]].y);
+
+            vbo_data.push_back(vertices[vertexIndex[(j + 2) % 3]].x);
+            vbo_data.push_back(vertices[vertexIndex[(j + 2) % 3]].y);
+            vbo_data.push_back(vertices[vertexIndex[(j + 2) % 3]].z);
+            vbo_data.push_back(normals[normalIndex[(j + 2) % 3]].x);
+            vbo_data.push_back(normals[normalIndex[(j + 2) % 3]].y);
+            vbo_data.push_back(normals[normalIndex[(j + 2) % 3]].z);
+            vbo_data.push_back(uvs[uvIndex[(j + 2) % 3]].x);
+            vbo_data.push_back(uvs[uvIndex[(j + 2) % 3]].y);
 
             indices.push_back(counter_index++);
+            /*
+            if (pushed_vertices.find({vertexIndex[j], normalIndex[j]}) == pushed_vertices.end())
+            {
+                vbo_data.push_back(vertices[vertexIndex[j]].x);
+                vbo_data.push_back(vertices[vertexIndex[j]].y);
+                vbo_data.push_back(vertices[vertexIndex[j]].z);
+                vbo_data.push_back(normals[normalIndex[j]].x);
+                vbo_data.push_back(normals[normalIndex[j]].y);
+                vbo_data.push_back(normals[normalIndex[j]].z);
+                vbo_data.push_back(uvs[uvIndex[j]].x);
+                vbo_data.push_back(uvs[uvIndex[j]].y);
+
+                indices.push_back(counter_index++);
+                pushed_vertices[{vertexIndex[j], normalIndex[j]}] = counter_index;
+
+            }
+            else
+            {
+                indices.push_back(pushed_vertices[{vertexIndex[j], normalIndex[j]}]);
+            }
+
+            if (pushed_vertices.find({adjacentVertex_index, adjacentNormal_index}) == pushed_vertices.end())
+            {
+                vbo_data.push_back(vertices[adjacentVertex_index].x);
+                vbo_data.push_back(vertices[adjacentVertex_index].y);
+                vbo_data.push_back(vertices[adjacentVertex_index].z);
+                vbo_data.push_back(normals[adjacentNormal_index].x);
+                vbo_data.push_back(normals[adjacentNormal_index].y);
+                vbo_data.push_back(normals[adjacentNormal_index].z);
+                vbo_data.push_back(uvs[adjacentUv_index].x);
+                vbo_data.push_back(uvs[adjacentUv_index].y);
+
+                indices.push_back(counter_index++);
+                pushed_vertices[{adjacentVertex_index, adjacentNormal_index}] = counter_index;
+
+            }
+            else
+            {
+                indices.push_back(pushed_vertices[{adjacentVertex_index, adjacentNormal_index}]);
+            }
+            
+            if (pushed_vertices.find({vertexIndex[(j+1)%3], normalIndex[(j+1) % 3] }) == pushed_vertices.end())
+            {
+                vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].x);
+                vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].y);
+                vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].z);
+                vbo_data.push_back(normals[normalIndex[(j+1)%3]].x);
+                vbo_data.push_back(normals[normalIndex[(j+1)%3]].y);
+                vbo_data.push_back(normals[normalIndex[(j+1)%3]].z);
+                vbo_data.push_back(uvs[uvIndex[(j+1)%3]].x);
+                vbo_data.push_back(uvs[uvIndex[(j+1)%3]].y);
+
+                indices.push_back(counter_index++);
+                pushed_vertices[{vertexIndex[(j+1)%3], normalIndex[(j+1) % 3] }] = counter_index;
+
+            }
+            else
+            {
+                indices.push_back(pushed_vertices[{vertexIndex[(j+1)%3], normalIndex[(j+1) % 3] }]);
+            }
+            
+            if (pushed_vertices.find({vertexIndex[(j+2)%3], normalIndex[(j+2) % 3]}) == pushed_vertices.end())
+            {
+                vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].x);
+                vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].y);
+                vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].z);
+                vbo_data.push_back(normals[normalIndex[(j+2)%3]].x);
+                vbo_data.push_back(normals[normalIndex[(j+2)%3]].y);
+                vbo_data.push_back(normals[normalIndex[(j+2)%3]].z);
+                vbo_data.push_back(uvs[uvIndex[(j+2)%3]].x);
+                vbo_data.push_back(uvs[uvIndex[(j+2)%3]].y);
+
+                indices.push_back(counter_index++);
+                pushed_vertices[{vertexIndex[(j+2)%3], normalIndex[(j+2) % 3]}] = counter_index;
+
+            }
+            else
+            {
+                indices.push_back(pushed_vertices[{vertexIndex[(j+2)%3], normalIndex[(j+2) % 3]}]);
+            }*/
         }
     }
 }
