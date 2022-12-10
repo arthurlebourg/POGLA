@@ -13,20 +13,22 @@ out TCE_OUT {
     vec2 uv;
 } tce_out;
 
+uniform float seed;
+
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * (43758.5453));
+} // random between 0 and 1
+
 void main()
 {
-    vec4 p = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
-    gl_Position = p;
-    
-    //vec3 n1 = mix(tcs_out[0].normal, tcs_out[1].normal, gl_TessCoord.x);
-    //vec3 n2 = mix(tcs_out[2].normal, tcs_out[3].normal, gl_TessCoord.x);
-    //vec3 n = mix(n1, n2, gl_TessCoord.y);
     vec3 n = mix(tcs_out[0].normal, tcs_out[1].normal, gl_TessCoord.x);
     tce_out.normal = n;
-
-    //vec2 uv1 = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
-    //vec2 uv2 = mix(tcs_out[2].uv, tcs_out[3].uv, gl_TessCoord.x);
-    //vec2 uv = mix(uv1, uv2, gl_TessCoord.y);
+    
     vec2 uv = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
     tce_out.uv = uv;
+    
+    vec4 p = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
+    gl_Position = p + vec4(n * rand(uv * seed) * 0.25, 0.0);
+    
+
 }

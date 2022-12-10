@@ -10,16 +10,10 @@ out VS_OUT {
 } vs_out;
 
 uniform mat4 transform;
-uniform float seed;
-
-float rand(vec2 co){
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * (43758.5453));
-} // random between 0 and 1
 
 void main()
 {
     gl_Position = transform * vec4(position, 1.0);
     vs_out.normal = normalize((transpose(inverse(transform)) * vec4(normal, 1.0f)).xyz);
-    gl_Position += vec4(vs_out.normal * rand(uv * seed) * 0.25, 0.0);
     vs_out.uv = uv;
 }
