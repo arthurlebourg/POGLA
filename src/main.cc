@@ -12,7 +12,7 @@ int main()
 
     Object plane("objects/plane.obj", "textures/white.tga", glm::vec3(0, 0, 0),
                  0.0);
-    Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, 5, 5),
+    Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, 7, 5),
                 0.0);
 
     auto scene = std::make_shared<Scene>(glm::vec3(0.0, 10.0, 0.0));
@@ -21,7 +21,7 @@ int main()
     scene->add_player(player);
     scene->add_object(std::make_shared<Object>(plane));
     scene->add_object(std::make_shared<Object>(cube));
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 2; i++)
     {
         Object amogus("objects/amongus.obj", "textures/pierre_sang.tga",
                       glm::vec3(0, 30 + 2*i, 30), 1.0);
