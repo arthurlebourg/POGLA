@@ -61,7 +61,6 @@ Object::Object(const std::string obj_file, const std::string texture,
 
     btConvexHullShape *shape = new btConvexHullShape();
     //int count = 0;
-    std::cout << "vertices size: " << vertices_.size() << std::endl;
     for (auto i : vertices_)
     {
         shape->addPoint(btVector3(i.x, i.y, i.z));
