@@ -241,7 +241,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         }
     }
     
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> pushed_vertices;
+    std::map<std::array<unsigned int, 3>, unsigned int> pushed_vertices;
 
     int counter_index = 0;
     for (unsigned int i = 0; i < vertexIndices.size(); i+=3)
@@ -264,7 +264,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             unsigned int adjacentVertex_index = halfEdgeToVertex[otherHalfEdge];
             unsigned int adjacentNormal_index = halfEdgeToNormal[otherHalfEdge];
             unsigned int adjacentUv_index = halfEdgeToUv[otherHalfEdge];
-            vbo_data.push_back(vertices[vertexIndex[j]].x);
+            /*vbo_data.push_back(vertices[vertexIndex[j]].x);
             vbo_data.push_back(vertices[vertexIndex[j]].y);
             vbo_data.push_back(vertices[vertexIndex[j]].z);
             vbo_data.push_back(normals[normalIndex[j]].x);
@@ -307,8 +307,9 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(uvs[uvIndex[(j + 2) % 3]].y);
 
             indices.push_back(counter_index++);
-            /*
-            if (pushed_vertices.find({vertexIndex[j], normalIndex[j]}) == pushed_vertices.end())
+            */
+            
+            if (pushed_vertices.find({vertexIndex[j], normalIndex[j], uvIndex[j]}) == pushed_vertices.end())
             {
                 vbo_data.push_back(vertices[vertexIndex[j]].x);
                 vbo_data.push_back(vertices[vertexIndex[j]].y);
@@ -319,36 +320,15 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 vbo_data.push_back(uvs[uvIndex[j]].x);
                 vbo_data.push_back(uvs[uvIndex[j]].y);
 
-                indices.push_back(counter_index++);
-                pushed_vertices[{vertexIndex[j], normalIndex[j]}] = counter_index;
-
+                indices.push_back(counter_index);
+                pushed_vertices[{vertexIndex[j], normalIndex[j], uvIndex[j]}] = counter_index++;
             }
             else
             {
-                indices.push_back(pushed_vertices[{vertexIndex[j], normalIndex[j]}]);
-            }
-
-            if (pushed_vertices.find({adjacentVertex_index, adjacentNormal_index}) == pushed_vertices.end())
-            {
-                vbo_data.push_back(vertices[adjacentVertex_index].x);
-                vbo_data.push_back(vertices[adjacentVertex_index].y);
-                vbo_data.push_back(vertices[adjacentVertex_index].z);
-                vbo_data.push_back(normals[adjacentNormal_index].x);
-                vbo_data.push_back(normals[adjacentNormal_index].y);
-                vbo_data.push_back(normals[adjacentNormal_index].z);
-                vbo_data.push_back(uvs[adjacentUv_index].x);
-                vbo_data.push_back(uvs[adjacentUv_index].y);
-
-                indices.push_back(counter_index++);
-                pushed_vertices[{adjacentVertex_index, adjacentNormal_index}] = counter_index;
-
-            }
-            else
-            {
-                indices.push_back(pushed_vertices[{adjacentVertex_index, adjacentNormal_index}]);
+                indices.push_back(pushed_vertices[{vertexIndex[j], normalIndex[j], uvIndex[j]}]);
             }
             
-            if (pushed_vertices.find({vertexIndex[(j+1)%3], normalIndex[(j+1) % 3] }) == pushed_vertices.end())
+            if (pushed_vertices.find({vertexIndex[(j+1)%3], normalIndex[(j+1) % 3], uvIndex[(j + 1) % 3]}) == pushed_vertices.end())
             {
                 vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].x);
                 vbo_data.push_back(vertices[vertexIndex[(j+1)%3]].y);
@@ -359,16 +339,34 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 vbo_data.push_back(uvs[uvIndex[(j+1)%3]].x);
                 vbo_data.push_back(uvs[uvIndex[(j+1)%3]].y);
 
-                indices.push_back(counter_index++);
-                pushed_vertices[{vertexIndex[(j+1)%3], normalIndex[(j+1) % 3] }] = counter_index;
-
+                indices.push_back(counter_index);
+                pushed_vertices[{vertexIndex[(j+1)%3], normalIndex[(j+1) % 3], uvIndex[(j + 1) % 3]}] = counter_index++;
             }
             else
             {
-                indices.push_back(pushed_vertices[{vertexIndex[(j+1)%3], normalIndex[(j+1) % 3] }]);
+                indices.push_back(pushed_vertices[{vertexIndex[(j+1)%3], normalIndex[(j+1) % 3], uvIndex[(j + 1) % 3]}]);
             }
             
-            if (pushed_vertices.find({vertexIndex[(j+2)%3], normalIndex[(j+2) % 3]}) == pushed_vertices.end())
+            if (pushed_vertices.find({adjacentVertex_index, adjacentNormal_index, adjacentUv_index}) == pushed_vertices.end())
+            {
+                vbo_data.push_back(vertices[adjacentVertex_index].x);
+                vbo_data.push_back(vertices[adjacentVertex_index].y);
+                vbo_data.push_back(vertices[adjacentVertex_index].z);
+                vbo_data.push_back(normals[adjacentNormal_index].x);
+                vbo_data.push_back(normals[adjacentNormal_index].y);
+                vbo_data.push_back(normals[adjacentNormal_index].z);
+                vbo_data.push_back(uvs[adjacentUv_index].x);
+                vbo_data.push_back(uvs[adjacentUv_index].y);
+
+                indices.push_back(counter_index);
+                pushed_vertices[{adjacentVertex_index, adjacentNormal_index, adjacentUv_index}] = counter_index++;
+            }
+            else
+            {
+                indices.push_back(pushed_vertices[{adjacentVertex_index, adjacentNormal_index, adjacentUv_index}]);
+            }
+            
+            if (pushed_vertices.find({vertexIndex[(j+2)%3], normalIndex[(j+2) % 3], uvIndex[(j + 2) % 3]}) == pushed_vertices.end())
             {
                 vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].x);
                 vbo_data.push_back(vertices[vertexIndex[(j+2)%3]].y);
@@ -379,14 +377,13 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
                 vbo_data.push_back(uvs[uvIndex[(j+2)%3]].x);
                 vbo_data.push_back(uvs[uvIndex[(j+2)%3]].y);
 
-                indices.push_back(counter_index++);
-                pushed_vertices[{vertexIndex[(j+2)%3], normalIndex[(j+2) % 3]}] = counter_index;
-
+                indices.push_back(counter_index);
+                pushed_vertices[{vertexIndex[(j+2)%3], normalIndex[(j+2) % 3], uvIndex[(j + 2) % 3]}] = counter_index++;
             }
             else
             {
-                indices.push_back(pushed_vertices[{vertexIndex[(j+2)%3], normalIndex[(j+2) % 3]}]);
-            }*/
+                indices.push_back(pushed_vertices[{vertexIndex[(j+2)%3], normalIndex[(j+2) % 3], uvIndex[(j + 2) % 3]}]);
+            }
         }
     }
 }
