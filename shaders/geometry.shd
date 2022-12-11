@@ -16,6 +16,7 @@ out GS_OUT {
 
 uniform mat4 model_view_matrix;
 uniform mat4 projection_matrix;
+uniform float far = 300.0;
 
 void main()
 {
@@ -31,41 +32,45 @@ void main()
     vec2 dir = normalize(ndcSpace1_2d - ndcSpace2_2d);
     vec2 normal = vec2(-dir.y, dir.x);
     
-    vec3 cam_pos = vec3(inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0));
-    float length = distance(cam_pos, gl_in[0].gl_Position.xyz);
-    float size = distance(ndcSpace1_2d, ndcSpace2_2d);
+    vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    float dist = distance(cam_pos, (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz) / 2.0);
+    if (dist > far) {
+        return;
+    }
 
-    gl_Position = clipSpace1 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
+    dist /= far;
+
+    gl_Position = clipSpace1 + vec4(normal * 1.00 * dist, 0.0, 0.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = clipSpace2 + vec4(normal * -0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gl_Position = clipSpace2 + vec4(normal * -1.00 * dist, 0.0, 0.0);
     gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
-    gl_Position = clipSpace1 + vec4(normal * -0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gl_Position = clipSpace1 + vec4(normal * -1.00 * dist, 0.0, 0.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = clipSpace1 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gl_Position = clipSpace1 + vec4(normal * 1.00 * dist, 0.0, 0.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
     
-    gl_Position = clipSpace2 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gl_Position = clipSpace2 + vec4(normal * 1.00 * dist, 0.0, 0.0);
     gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
-    gl_Position = clipSpace2 + vec4(normal * -0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gl_Position = clipSpace2 + vec4(normal * -1.00 * dist, 0.0, 0.0);
     gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
-    gl_Position = clipSpace1 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gl_Position = clipSpace1 + vec4(normal * 1.00 * dist, 0.0, 0.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();

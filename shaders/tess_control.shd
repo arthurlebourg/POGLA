@@ -24,7 +24,7 @@ void main()
     vec3 center_main = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[3].gl_Position.xyz) / 3.0;
     vec3 center_adj = (gl_in[0].gl_Position.xyz + gl_in[1].gl_Position.xyz + gl_in[2].gl_Position.xyz) / 3.0;
     
-    vec3 cam_pos = vec3(inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0));
+    vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
     float dot_main = dot(normalize(cam_pos - center_main), normal_main);
     float dot_adj = dot(normal_adj, normalize(cam_pos - center_adj));
@@ -50,7 +50,7 @@ void main()
 
     float length = distance(ndcSpace1_2d, ndcSpace2_2d);
 
-    tcs_out[gl_InvocationID].color = vec3(0.0, length, 0.0);
+    tcs_out[gl_InvocationID].color = vec3(1.0);//vec3(0.0, length, 0.0);
     
     gl_TessLevelOuter[0] = max(length * 10.0, 1.0);
     gl_TessLevelOuter[1] = max(length * 10.0, 1.0);
