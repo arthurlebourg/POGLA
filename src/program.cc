@@ -224,6 +224,12 @@ void Program::render(glm::mat4 const &model_view_matrix,
     render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
     render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);
     render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);
+    GLint m_viewport[4];
+
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    
+    render_shader_.set_vec2_uniform("viewOffset", glm::vec2(m_viewport[0], m_viewport[1]));
+    render_shader_.set_vec2_uniform("viewSize", glm::vec2(m_viewport[2], m_viewport[3]));
 
 
     if (time_to_update_seed_ <= 0.0)

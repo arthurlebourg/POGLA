@@ -18,6 +18,7 @@ public:
 
     void set_mat4_uniform(const char *name, glm::mat4 mat);
     void set_mat4_uniform(const char *name, btScalar *mat);
+    void set_vec2_uniform(const char *name, glm::vec2 vec);
     void set_vec3_uniform(const char *name, glm::vec3 vec);
     void set_float_uniform(const char *name, float x);
 

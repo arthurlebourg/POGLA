@@ -297,6 +297,12 @@ void Shader::set_mat4_uniform(const char *name, btScalar *mat)
     glUniformMatrix4fv(location, 1, GL_FALSE, res);
 }
 
+void Shader::set_vec2_uniform(const char *name, glm::vec2 vec)
+{
+    GLint location = glGetUniformLocation(shader_program_, name);
+    glUniform2fv(location, 1, glm::value_ptr(vec));
+}
+
 void Shader::set_vec3_uniform(const char *name, glm::vec3 vec)
 {
     GLint location = glGetUniformLocation(shader_program_, name);
