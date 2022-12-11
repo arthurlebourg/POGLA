@@ -24,27 +24,27 @@ void main()
     vec4 dir = normalize(pos2 - pos1);
     vec2 normal = vec2(-dir.y, dir.x);
 
-    gl_Position = vec4(pos1.xy + normal * 0.1, pos1.zw);
+    gl_Position = vec4(pos1.xy + normal * 0.05, pos1.zw);
     gs_out.color = vec3(1.0, 1.0, 1.0);
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos2.xy + normal * -0.1, pos2.z, pos2.w);
+    gl_Position = vec4(pos2.xy + normal * -0.05, pos2.zw);
     gs_out.color = vec3(1.0, 1.0, 1.0);
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos1.xy + normal * -0.1, pos1.z, pos1.w);
+    gl_Position = vec4(pos1.xy + normal * -0.05, pos1.zw);
     gs_out.color = vec3(1.0, 1.0, 1.0);
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos1.xy + normal * 0.1, pos1.z, pos1.w);
+    gl_Position = vec4(pos1.xy + normal * 0.05, pos1.zw);
     gs_out.color = vec3(1.0, 1.0, 1.0);
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos2.xy + normal * 0.1, pos1.z, pos2.w);
+    gl_Position = vec4(pos2.xy + normal * 0.05, pos2.zw);
     gs_out.color = vec3(1.0, 1.0, 1.0);
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
