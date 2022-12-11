@@ -242,14 +242,24 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
     }
     
     std::map<std::array<unsigned int, 3>, unsigned int> pushed_vertices;
+    std::map<std::pair<unsigned int, unsigned int>, unsigned int> pushed_edges;
 
     int counter_index = 0;
-    for (unsigned int i = 0; i < vertexIndices.size() - 1; i++)
+    for (unsigned int i = 0; i < vertexIndices.size(); i++)
     {
         unsigned int second_index = i + 1;
         if (i % 3 == 2)
         {
             second_index = i - 1;
+        }
+        if (pushed_edges.find({ vertexIndices[i], vertexIndices[second_index] }) != pushed_edges.end())
+        {
+            continue;
+        }
+        else
+        {
+            pushed_edges[std::make_pair(vertexIndices[i], vertexIndices[second_index])] = counter_index;
+            pushed_edges[std::make_pair(vertexIndices[second_index], vertexIndices[i])] = counter_index;
         }
 
         std::pair<unsigned int, unsigned int> left_edge =
