@@ -1,7 +1,7 @@
 #version 450
 
 layout (lines) in;
-layout (triangle_strip, max_vertices = 5) out;
+layout (triangle_strip, max_vertices = 8) out;
 
 in TCE_OUT {
     vec3 normal;
@@ -19,38 +19,55 @@ uniform mat4 projection_matrix;
 
 void main()
 {
-    vec3 ndcSpace1 = gl_in[0].gl_Position.xyz / gl_in[0].gl_Position.w;
-    vec3 ndcSpace2 = gl_in[1].gl_Position.xyz / gl_in[1].gl_Position.w;
+    vec4 clipSpace1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
+    vec4 clipSpace2 = projection_matrix * model_view_matrix * gl_in[1].gl_Position;
+
+    vec3 ndcSpace1 = clipSpace1.xyz / clipSpace1.w;
+    vec3 ndcSpace2 = clipSpace2.xyz / clipSpace2.w;
 
     vec2 ndcSpace1_2d = (ndcSpace1.xy + 1.0) / 2.0;
     vec2 ndcSpace2_2d = (ndcSpace2.xy + 1.0) / 2.0;
 
     vec2 dir = normalize(ndcSpace1_2d - ndcSpace2_2d);
     vec2 normal = vec2(-dir.y, dir.x);
+    
+    vec3 cam_pos = vec3(inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0));
+    float length = distance(cam_pos, gl_in[0].gl_Position.xyz);
+    float size = distance(ndcSpace1_2d, ndcSpace2_2d);
 
-    gl_Position = vec4(gl_in[0].gl_Position.xy + normal * 0.05, gl_in[0].gl_Position.zw);
+    gl_Position = clipSpace1 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(gl_in[1].gl_Position.xy + normal * -0.05, gl_in[1].gl_Position.zw);
+    gl_Position = clipSpace2 + vec4(normal * -0.05 * (1.0 - length) * size, 0.0, 0.0);
     gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
-    gl_Position = vec4(gl_in[0].gl_Position.xy + normal * -0.05, gl_in[0].gl_Position.zw);
+    gl_Position = clipSpace1 + vec4(normal * -0.05 * (1.0 - length) * size, 0.0, 0.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(gl_in[0].gl_Position.xy + normal * 0.05, gl_in[0].gl_Position.zw);
+    gl_Position = clipSpace1 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
-
-    gl_Position = vec4(gl_in[1].gl_Position.xy + normal * 0.05, gl_in[1].gl_Position.zw);
+    
+    gl_Position = clipSpace2 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
     gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
+    EmitVertex();
+
+    gl_Position = clipSpace2 + vec4(normal * -0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gs_out.color = tce_out[1].color;
+    gs_out.uv = tce_out[1].uv;
+    EmitVertex();
+
+    gl_Position = clipSpace1 + vec4(normal * 0.05 * (1.0 - length) * size, 0.0, 0.0);
+    gs_out.color = tce_out[0].color;
+    gs_out.uv = tce_out[0].uv;
     EmitVertex();
     
     EndPrimitive();
