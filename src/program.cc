@@ -237,7 +237,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
     for (auto obj : scene_->get_objs())
     {
         glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
-        //glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
+        glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
         render_shader_.use();TEST_OPENGL_ERROR();
         glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
 
@@ -245,15 +245,12 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 
-        //glLineWidth(5.0f);
         TEST_OPENGL_ERROR();
         glPatchParameteri(GL_PATCH_VERTICES, 4);
         glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT, 0);
-        //glDrawElements(GL_TRIANGLES_ADJACENCY, obj->get_indices_number(), GL_UNSIGNED_INT, 0);
         TEST_OPENGL_ERROR();
         
         glBindVertexArray(0);TEST_OPENGL_ERROR();
-        TEST_OPENGL_ERROR();
     }
 
     glfwSwapBuffers(window_);

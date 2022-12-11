@@ -6,6 +6,7 @@ layout (triangle_strip, max_vertices = 5) out;
 in TCE_OUT {
     vec3 normal;
     vec2 uv;
+    vec3 color;
 } tce_out[];
 
 out GS_OUT {
@@ -18,34 +19,37 @@ uniform mat4 projection_matrix;
 
 void main()
 {
-    vec4 pos1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
-    vec4 pos2 = projection_matrix * model_view_matrix * gl_in[1].gl_Position;
-    
-    vec4 dir = normalize(pos2 - pos1);
+    vec3 ndcSpace1 = gl_in[0].gl_Position.xyz / gl_in[0].gl_Position.w;
+    vec3 ndcSpace2 = gl_in[1].gl_Position.xyz / gl_in[1].gl_Position.w;
+
+    vec2 ndcSpace1_2d = (ndcSpace1.xy + 1.0) / 2.0;
+    vec2 ndcSpace2_2d = (ndcSpace2.xy + 1.0) / 2.0;
+
+    vec2 dir = normalize(ndcSpace1_2d - ndcSpace2_2d);
     vec2 normal = vec2(-dir.y, dir.x);
 
-    gl_Position = vec4(pos1.xy + normal * 0.05, pos1.zw);
-    gs_out.color = vec3(1.0, 1.0, 1.0);
+    gl_Position = vec4(gl_in[0].gl_Position.xy + normal * 0.05, gl_in[0].gl_Position.zw);
+    gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos2.xy + normal * -0.05, pos2.zw);
-    gs_out.color = vec3(1.0, 1.0, 1.0);
+    gl_Position = vec4(gl_in[1].gl_Position.xy + normal * -0.05, gl_in[1].gl_Position.zw);
+    gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos1.xy + normal * -0.05, pos1.zw);
-    gs_out.color = vec3(1.0, 1.0, 1.0);
+    gl_Position = vec4(gl_in[0].gl_Position.xy + normal * -0.05, gl_in[0].gl_Position.zw);
+    gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos1.xy + normal * 0.05, pos1.zw);
-    gs_out.color = vec3(1.0, 1.0, 1.0);
+    gl_Position = vec4(gl_in[0].gl_Position.xy + normal * 0.05, gl_in[0].gl_Position.zw);
+    gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = vec4(pos2.xy + normal * 0.05, pos2.zw);
-    gs_out.color = vec3(1.0, 1.0, 1.0);
+    gl_Position = vec4(gl_in[1].gl_Position.xy + normal * 0.05, gl_in[1].gl_Position.zw);
+    gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
     

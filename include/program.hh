@@ -47,7 +47,7 @@ private:
 
     bool ready_;
 
-    float nb_of_updates_per_seconds_ = 24.0f; // 24 updates per seconds or 12 updates per seconds (stop motion standard)
+    float nb_of_updates_per_seconds_ = 12.0f; // 24 updates per seconds or 12 updates per seconds (stop motion standard)
     float time_to_update_seed_ = 1.0 / nb_of_updates_per_seconds_;
 };
 
