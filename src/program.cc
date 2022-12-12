@@ -158,54 +158,59 @@ GLFWwindow *init_window()
     return window;
 }
 
-Program::Program(std::string &vertex_shader_src,
-                 std::string &fragment_shader_src,
-                 GLFWwindow *window,
-                 std::shared_ptr<Scene> scene)
-    : scene_(scene)
-    , window_(window)
-    , render_shader_(Shader(vertex_shader_src, fragment_shader_src))
-{
-    ready_ = false;
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    render_shader_.use();
 
-    glfwSetCursorPosCallback(window, mouse_motion_callback);
-    glfwSetKeyCallback(window, keyboard_callback);
-
-    ready_ = true;
-}
-
-Program::Program(std::string &vertex_shader_src, std::string &fragment_shader_src,
-        std::string &geometry_shader_src, std::string &tess_control_src,
-        std::string &tess_eval_src, GLFWwindow *window,
+Program::Program(GLFWwindow *window,
         std::shared_ptr<Scene> scene)
-        : scene_(scene),
-        window_(window),
-        render_shader_(Shader(vertex_shader_src, fragment_shader_src,
-                                geometry_shader_src, tess_control_src,
-                                tess_eval_src))
+        : scene_(scene)
+        , window_(window)
+        , render_shader_(Shader("shaders/classic.vert", "shaders/classic.tesc",
+                                "shaders/classic.tese", "shaders/classic.geom",
+                                "shaders/classic.frag"))
+        , depth_shader_(Shader("shaders/depth.vert", "shaders/depth.tesc",
+                               "shaders/depth.tese", "shaders/depth.geom",
+                               "shaders/depth.frag"))
 {
-    ready_ = false;
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
     render_shader_.use();
+    TEST_OPENGL_ERROR();
 
     glfwSetCursorPosCallback(window, mouse_motion_callback);
     glfwSetKeyCallback(window, keyboard_callback);
+    
+    GLint m_viewport[4];
 
-    ready_ = true;
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    TEST_OPENGL_ERROR();
+    
+    glGenFramebuffers(1, &depth_map_fbo_);
+    TEST_OPENGL_ERROR();
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
+    TEST_OPENGL_ERROR();
+    // create depth texture
+    glGenTextures(1, &depth_map_);
+    TEST_OPENGL_ERROR();
+    glActiveTexture(GL_TEXTURE1);
+    TEST_OPENGL_ERROR();
+    glBindTexture(GL_TEXTURE_2D, depth_map_);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_viewport[2],
+                 m_viewport[3], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = {1.0, 1.0, 1.0, 1.0};
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+                           depth_map_, 0);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    TEST_OPENGL_ERROR();
 }
 
 Program::~Program()
 {
     glfwTerminate();
-}
-
-bool Program::is_ready()
-{
-    return ready_;
 }
 
 GLFWwindow *Program::get_window()
@@ -216,48 +221,92 @@ GLFWwindow *Program::get_window()
 void Program::render(glm::mat4 const &model_view_matrix,
                      glm::mat4 const &projection_matrix, float deltaTime)
 {
-    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-    glClear(
-        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    render_shader_.use();
-    render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
-    render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);
-    render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);
+    render_shader_.use();TEST_OPENGL_ERROR();
+    //render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
+    render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
+    render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
+    
+    depth_shader_.use();TEST_OPENGL_ERROR();
+    depth_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
+    depth_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
+    
     GLint m_viewport[4];
 
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     
     render_shader_.set_vec2_uniform("viewOffset", glm::vec2(m_viewport[0], m_viewport[1]));
-    render_shader_.set_vec2_uniform("viewSize", glm::vec2(m_viewport[2], m_viewport[3]));
+    depth_shader_.set_vec2_uniform("viewSize", glm::vec2(m_viewport[2], m_viewport[3]));
 
 
     if (time_to_update_seed_ <= 0.0)
     {
         time_to_update_seed_ = 1.0 / nb_of_updates_per_seconds_;
         float seed = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        render_shader_.set_float_uniform("seed", seed);
+        render_shader_.use();TEST_OPENGL_ERROR();
+        render_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
+        depth_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
+        depth_shader_.use();TEST_OPENGL_ERROR();
     }
     time_to_update_seed_ -= deltaTime;
+    TEST_OPENGL_ERROR();
 
+    // depth render
+    /*glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
+    depth_shader_.use();TEST_OPENGL_ERROR();
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    TEST_OPENGL_ERROR();
+    glDepthFunc(GL_LESS);
+    TEST_OPENGL_ERROR();
+    glEnable(GL_CULL_FACE);
+    TEST_OPENGL_ERROR();
     for (auto obj : scene_->get_objs())
     {
-        glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
-        glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
-        render_shader_.use();TEST_OPENGL_ERROR();
         glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
+
+        depth_shader_.set_mat4_uniform("transform", obj->get_transform());
+
+        TEST_OPENGL_ERROR();
+        glPatchParameteri(GL_PATCH_VERTICES, 3);
+        glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT,
+    0); TEST_OPENGL_ERROR();
+
+        glBindVertexArray(0);TEST_OPENGL_ERROR();
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
+
+
+    // real render
+    render_shader_.use();TEST_OPENGL_ERROR();
+    //render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
+    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    glClear(
+        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    TEST_OPENGL_ERROR();
+    glDepthFunc(GL_LESS); 
+    TEST_OPENGL_ERROR();
+    //glDepthMask(GL_FALSE);TEST_OPENGL_ERROR();  
+    for (auto obj : scene_->get_objs())
+    {
+        glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
+        GLuint printBuffer = createPrintBuffer();
+        bindPrintBuffer(render_shader_.shader_program_, printBuffer);
 
         render_shader_.bind_texture(obj);TEST_OPENGL_ERROR();
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 
-        glLineWidth(5.0f);
         TEST_OPENGL_ERROR();
         glPatchParameteri(GL_PATCH_VERTICES, 4);
         glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT, 0);
         TEST_OPENGL_ERROR();
-        
+        printf("\n\nGLSL print:\n%s\n", getPrintBufferString(printBuffer).c_str());
+        deletePrintBuffer(printBuffer);
         glBindVertexArray(0);TEST_OPENGL_ERROR();
+        //exit(0);
     }
 
     glfwSwapBuffers(window_);

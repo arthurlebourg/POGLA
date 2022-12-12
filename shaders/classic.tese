@@ -6,14 +6,12 @@ layout(isolines, equal_spacing, ccw) in;
 in TCS_OUT {
     vec3 normal;
     vec2 uv;
-    vec3 color;
     float segment_length;
 } tcs_out[];
 
 out TCE_OUT {
     vec3 normal;
     vec2 uv;
-    vec3 color;
 } tce_out;
 
 uniform float seed;
@@ -33,15 +31,12 @@ void main()
     vec2 uv = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
     tce_out.uv = uv;
 
-    vec3 color = mix(tcs_out[0].color, tcs_out[1].color, gl_TessCoord.x);
-    tce_out.color = color;
-    
     vec4 p = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_TessCoord.x);
 
     float segment_length = mix(tcs_out[0].segment_length, tcs_out[1].segment_length, gl_TessCoord.x);
     
-    vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    /*vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     float dist = distance(cam_pos, p.xyz);
-    dist /= far;
-    gl_Position = p + vec4(n * rand(uv * seed) * dist * 5.0, 0.0);
+    dist /= far;*/
+    gl_Position = p;//+ vec4(n * rand(uv * seed) * segment_length * 1.0, 0.0);
 }

@@ -42,132 +42,6 @@ void test_opengl_error(std::string func, std::string file, int line)
     }
 }
 
-/*void load_obj(const char *filename, std::vector<glm::vec3> &vertices, std::vector<unsigned int> &indices,
-              std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals)
-{
-    std::ifstream in(filename, std::ios::in);
-    if (!in)
-    {
-        std::cerr << "Cannot open " << filename << std::endl;
-        return;
-    }
-    std::vector<unsigned int> vertexIndices;
-    std::vector<unsigned int> uvIndices;
-    std::vector<unsigned int> normalIndices;
-
-    std::string line("");
-    while (getline(in, line))
-    {
-        if (line.substr(0, 2) == "v ")
-        {
-            std::istringstream s(line.substr(2));
-            glm::vec3 v;
-            s >> v.x;
-            s >> v.y;
-            s >> v.z;
-            vertices.push_back(v);
-        }
-        else if (line.substr(0, 2) == "vt")
-        {
-            std::istringstream s(line.substr(2));
-            glm::vec2 v;
-            s >> v.x;
-            s >> v.y;
-            uvs.push_back(v);
-        }
-        else if (line.substr(0, 2) == "vn")
-        {
-            std::istringstream s(line.substr(2));
-            glm::vec3 v;
-            s >> v.x;
-            s >> v.y;
-            s >> v.z;
-            normals.push_back(v);
-        }
-        else if (line.substr(0, 2) == "f ")
-        {
-            std::string s(line.substr(2));
-            unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-            //unsigned int vertexIndex[4], uvIndex[4], normalIndex[4];
-            int matches = sscanf(s.c_str(), "%u/%u/%u %u/%u/%u %u/%u/%u \n",
-                                 &vertexIndex[0], &uvIndex[0], &normalIndex[0],
-                                 &vertexIndex[1], &uvIndex[1], &normalIndex[1],
-                                 &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-                                 //&vertexIndex[3], &uvIndex[3], &normalIndex[3]);
-            if (matches != 9)
-            //if (matches != 12)
-            {
-                printf("File can't be read by our simple parser : ( Try "
-                       "exporting with other options\n");
-                printf("Please use quads encoding\n");
-                return;
-            }
-            vertexIndices.push_back(vertexIndex[0]);
-            vertexIndices.push_back(vertexIndex[1]);
-            vertexIndices.push_back(vertexIndex[2]);
-            //vertexIndices.push_back(vertexIndex[3]);
-            uvIndices.push_back(uvIndex[0]);
-            uvIndices.push_back(uvIndex[1]);
-            uvIndices.push_back(uvIndex[2]);
-            //uvIndices.push_back(uvIndex[3]);
-            normalIndices.push_back(normalIndex[0]);
-            normalIndices.push_back(normalIndex[1]);
-            normalIndices.push_back(normalIndex[2]);
-            //normalIndices.push_back(normalIndex[3]);
-        }
-    }
-    
-    //  Build a hash table that maps from a half-edge (expressed as a pair of indices, in order) to the third index of the triangle the half-edge belongs to.
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToVertex;
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToNormal;
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToUv;
-    
-    for (unsigned int i = 0; i < vertexIndices.size(); i += 3)
-    {
-        halfEdgeToVertex[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = vertexIndices[i + 2];
-        halfEdgeToNormal[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = normalIndices[i + 2];
-        halfEdgeToUv[std::make_pair(vertexIndices[i], vertexIndices[i + 1])] = uvIndices[i + 2];
-        
-        halfEdgeToVertex[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = vertexIndices[i];
-        halfEdgeToNormal[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = normalIndices[i];
-        halfEdgeToUv[std::make_pair(vertexIndices[i + 1], vertexIndices[i + 2])] = uvIndices[i];
-        
-        halfEdgeToVertex[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = vertexIndices[i + 1];
-        halfEdgeToNormal[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = normalIndices[i + 1];
-        halfEdgeToUv[std::make_pair(vertexIndices[i + 2], vertexIndices[i])] = uvIndices[i + 1];
-    }
-
-    for (unsigned int i = 0; i < vertexIndices.size(); i+=3)
-    {
-        unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-        vertexIndex[0] = vertexIndices[i];
-        vertexIndex[1] = vertexIndices[i+1];
-        vertexIndex[2] = vertexIndices[i+2];
-        uvIndex[0] = uvIndices[i];
-        uvIndex[1] = uvIndices[i+1];
-        uvIndex[2] = uvIndices[i+2];
-        normalIndex[0] = normalIndices[i];
-        normalIndex[1] = normalIndices[i+1];
-        normalIndex[2] = normalIndices[i+2];
-
-        for (unsigned int j = 0; j < 3; j++)
-        {
-            std::pair<unsigned int, unsigned int> otherHalfEdge = std::make_pair(vertexIndex[(j+1)%3], vertexIndex[j]);
-
-            unsigned int adjacentVertex_index = halfEdgeToVertex[otherHalfEdge];
-            unsigned int adjacentNormal_index = halfEdgeToNormal[otherHalfEdge];
-            unsigned int adjacentUv_index = halfEdgeToUv[otherHalfEdge];
-            indices.push_back(vertexIndex[j]);
-            indices.push_back(normalIndex[j]);
-            indices.push_back(uvIndex[j]);
-
-            indices.push_back(adjacentVertex_index);
-            indices.push_back(adjacentNormal_index);
-            indices.push_back(adjacentUv_index);
-        }
-    }
-}*/
-
 void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
               std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals, 
               std::vector<unsigned int> &indices, std::vector<float> &vbo_data)
@@ -241,20 +115,21 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         }
     }
     
-    std::map<std::array<unsigned int, 3>, unsigned int> pushed_vertices;
+    std::map<std::array<unsigned int, 4>, unsigned int> pushed_vertices;
     std::map<std::pair<unsigned int, unsigned int>, unsigned int> pushed_edges;
 
     int counter_index = 0;
     for (unsigned int i = 0; i < vertexIndices.size(); i++)
     {
         unsigned int second_index = i + 1;
+        unsigned int is_base_triangle = i % 3 == 0 ? 1 : 0;
         if (i % 3 == 2)
         {
-            second_index = i - 1;
+            second_index = i - 2;
         }
         if (pushed_edges.find({ vertexIndices[i], vertexIndices[second_index] }) != pushed_edges.end())
         {
-            continue;
+            //continue;
         }
         else
         {
@@ -263,7 +138,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         }
 
         std::pair<unsigned int, unsigned int> left_edge =
-            std::make_pair(vertexIndices[second_index], vertexIndices[i]);
+            std::make_pair(vertexIndices[second_index], vertexIndices[i]); // left is the adjacent vertex
 
         std::pair<unsigned int, unsigned int> right_edge =
             std::make_pair(vertexIndices[i], vertexIndices[second_index]);
@@ -275,7 +150,8 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         unsigned int right_vertex_index = halfEdgeToVertex[right_edge];
         unsigned int right_normal_index = halfEdgeToNormal[right_edge];
         unsigned int right_uv_index = halfEdgeToUv[right_edge];
-        if (pushed_vertices.find({ vertexIndices[i], normalIndices[i], uvIndices[i] })
+
+        if (pushed_vertices.find({ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle })
             == pushed_vertices.end())
         {
             vbo_data.push_back(vertices[vertexIndices[i]].x);
@@ -286,21 +162,22 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(normals[normalIndices[i]].z);
             vbo_data.push_back(uvs[uvIndices[i]].x);
             vbo_data.push_back(uvs[uvIndices[i]].y);
+            vbo_data.push_back(is_base_triangle == 1 ? 1.0f : -1.0f);
 
             indices.push_back(counter_index);
-            pushed_vertices[{ vertexIndices[i], normalIndices[i], uvIndices[i] }] =
+            pushed_vertices[{ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle }] =
                 counter_index++;
         }
         else
         {
             indices.push_back(pushed_vertices[{ vertexIndices[i], normalIndices[i],
-                                                uvIndices[i]}]);
+                                                uvIndices[i], is_base_triangle }]);
         }
 
         if (pushed_vertices.find({ vertexIndices[second_index],
                                    normalIndices[second_index],
-                                   uvIndices[second_index] })
-            == pushed_vertices.end())
+                                   uvIndices[second_index],
+                                   is_base_triangle }) == pushed_vertices.end())
         {
             vbo_data.push_back(vertices[vertexIndices[second_index]].x);
             vbo_data.push_back(vertices[vertexIndices[second_index]].y);
@@ -310,45 +187,22 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(normals[normalIndices[second_index]].z);
             vbo_data.push_back(uvs[uvIndices[second_index]].x);
             vbo_data.push_back(uvs[uvIndices[second_index]].y);
+            vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
 
             indices.push_back(counter_index);
             pushed_vertices[{ vertexIndices[second_index],
                               normalIndices[second_index],
-                              uvIndices[second_index] }] = counter_index++;
+                              uvIndices[second_index], is_base_triangle }] = counter_index++;
         }
         else
         {
             indices.push_back(pushed_vertices[{ vertexIndices[second_index],
                                                 normalIndices[second_index],
-                                                uvIndices[second_index] }]);
-        }
-
-        if (pushed_vertices.find({ left_vertex_index, left_normal_index,
-                                   left_uv_index })
-            == pushed_vertices.end())
-        {
-            vbo_data.push_back(vertices[left_vertex_index].x);
-            vbo_data.push_back(vertices[left_vertex_index].y);
-            vbo_data.push_back(vertices[left_vertex_index].z);
-            vbo_data.push_back(normals[left_normal_index].x);
-            vbo_data.push_back(normals[left_normal_index].y);
-            vbo_data.push_back(normals[left_normal_index].z);
-            vbo_data.push_back(uvs[left_uv_index].x);
-            vbo_data.push_back(uvs[left_uv_index].y);
-
-            indices.push_back(counter_index);
-            pushed_vertices[{ left_vertex_index, left_normal_index,
-                              left_uv_index }] = counter_index++;
-        }
-        else
-        {
-            indices.push_back(
-                pushed_vertices[{ left_vertex_index, left_normal_index,
-                                  left_uv_index }]);
+                                                uvIndices[second_index], is_base_triangle }]);
         }
         
         if (pushed_vertices.find({ right_vertex_index, right_normal_index,
-                                   right_uv_index })
+                                   right_uv_index, is_base_triangle })
             == pushed_vertices.end())
         {
             vbo_data.push_back(vertices[right_vertex_index].x);
@@ -359,16 +213,42 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(normals[right_normal_index].z);
             vbo_data.push_back(uvs[right_uv_index].x);
             vbo_data.push_back(uvs[right_uv_index].y);
+            vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
 
             indices.push_back(counter_index);
             pushed_vertices[{ right_vertex_index, right_normal_index,
-                              right_uv_index }] = counter_index++;
+                              right_uv_index, is_base_triangle }] = counter_index++;
         }
         else
         {
             indices.push_back(
                 pushed_vertices[{ right_vertex_index, right_normal_index,
-                                  right_uv_index }]);
+                                  right_uv_index, is_base_triangle }]);
+        }
+
+        if (pushed_vertices.find({ left_vertex_index, left_normal_index,
+                                   left_uv_index, 0 })
+            == pushed_vertices.end())
+        {
+            vbo_data.push_back(vertices[left_vertex_index].x);
+            vbo_data.push_back(vertices[left_vertex_index].y);
+            vbo_data.push_back(vertices[left_vertex_index].z);
+            vbo_data.push_back(normals[left_normal_index].x);
+            vbo_data.push_back(normals[left_normal_index].y);
+            vbo_data.push_back(normals[left_normal_index].z);
+            vbo_data.push_back(uvs[left_uv_index].x);
+            vbo_data.push_back(uvs[left_uv_index].y);
+            vbo_data.push_back(-1.0);
+
+            indices.push_back(counter_index);
+            pushed_vertices[{ left_vertex_index, left_normal_index,
+                              left_uv_index, 0 }] = counter_index++;
+        }
+        else
+        {
+            indices.push_back(
+                pushed_vertices[{ left_vertex_index, left_normal_index,
+                                  left_uv_index, 0 }]);
         }
     }
 }
@@ -391,38 +271,6 @@ std::string read_file(const std::string &filename)
     input_src_file.close();
     return file_content;
 }
-
-/*void set_mat4_uniform(unsigned int shader_program, const char *name,
-                      glm::mat4 mat)
-{
-    GLint location = glGetUniformLocation(shader_program, name);
-    TEST_OPENGL_ERROR();
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
-    TEST_OPENGL_ERROR();
-}
-
-void set_mat4_uniform(unsigned int shader_program, const char *name,
-                      btScalar *mat)
-{
-    float res[16];
-    for (int i = 0; i < 16; i++)
-    {
-        res[i] = (float)mat[i];
-    }
-    GLint location = glGetUniformLocation(shader_program, name);
-    TEST_OPENGL_ERROR();
-    glUniformMatrix4fv(location, 1, GL_FALSE, res);
-    TEST_OPENGL_ERROR();
-}
-
-void set_vec3_uniform(unsigned int shader_program, const char *name,
-                      glm::vec3 vec)
-{
-    GLint location = glGetUniformLocation(shader_program, name);
-    TEST_OPENGL_ERROR();
-    glUniform3fv(location, 1, glm::value_ptr(vec));
-    TEST_OPENGL_ERROR();
-}*/
 
 btVector3 glmToBullet(const glm::vec3 &v)
 {

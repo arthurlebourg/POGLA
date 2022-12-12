@@ -16,6 +16,7 @@
 #include <map>
 #include <array>
 
+#include "printf.hh"
 void test_opengl_error(std::string func, std::string file, int line);
 
 #define TEST_OPENGL_ERROR()                                                    \

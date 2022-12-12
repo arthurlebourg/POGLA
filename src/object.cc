@@ -12,19 +12,39 @@ Object::Object(const std::string obj_file, const std::string texture,
     load_obj(obj_file.c_str(), vertices_, uv_, normals_, indices_, vbo_data);
     vertices_number_ = vertices_.size();
     indices_number_ = indices_.size();
-    
-    /*for (unsigned int i = 0; i < vertices_.size(); i++)
-    {
-        vbo_data.push_back(vertices_[i].x);
-        vbo_data.push_back(vertices_[i].y);
-        vbo_data.push_back(vertices_[i].z);
-        vbo_data.push_back(normals_[i].x);
-        vbo_data.push_back(normals_[i].y);
-        vbo_data.push_back(normals_[i].z);
-        vbo_data.push_back(uv_[i].x);
-        vbo_data.push_back(uv_[i].y);
-    }*/
 
+    /*int n = 0;
+
+    for (unsigned int i = 0; i < indices_.size(); i++)
+    {
+        if (n % 3 == 0 && i % 4 == 0)
+            std::cout << n << " // ";
+        for (int j = 0; j < 9; j++)
+        {
+            std::cout << vbo_data[indices_[i] * 9 + j] << " ";
+            if (j == 2 || j == 5 || j == 7)
+                std::cout << "| ";
+        }
+        if (i % 4 == 2)
+        {
+            std::cout << "   ---";
+        }
+        if (i % 4 == 3)
+        {
+            if (n % 3 == 2)
+                std::cout << std::endl;                
+            std::cout << std::endl;
+            n++;
+        }
+        else
+        {
+            std::cout << "   ";
+        }
+    }
+    std::cout << std::endl;*/
+
+    
+    
     glGenBuffers(1, &VBO);
     TEST_OPENGL_ERROR();
     glGenBuffers(1, &EBO_);
@@ -45,17 +65,25 @@ Object::Object(const std::string obj_file, const std::string texture,
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int), &indices_[0], GL_STATIC_DRAW);
     TEST_OPENGL_ERROR();
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
                           (void *)0);TEST_OPENGL_ERROR();
     glEnableVertexAttribArray(0);TEST_OPENGL_ERROR();
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
                           (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);TEST_OPENGL_ERROR();
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
                           (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);TEST_OPENGL_ERROR();
+
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+                          (void *)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);TEST_OPENGL_ERROR();
+
+    /*glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+                          (void *)(9 * sizeof(float)));
+    glEnableVertexAttribArray(4);TEST_OPENGL_ERROR();*/
 
     // create a dynamic rigidbody
 

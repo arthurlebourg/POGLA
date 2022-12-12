@@ -55,6 +55,7 @@ private:
 
     std::vector<glm::vec3> vertices_;
     std::vector<unsigned int> indices_;
+    
     std::vector<glm::vec3> normals_;
     std::vector<glm::vec2> uv_;
     tifo::rgb24_image *texture_;

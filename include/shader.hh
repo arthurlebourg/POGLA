@@ -6,11 +6,11 @@
 class Shader
 {
 public:
-    Shader(std::string &vertex_shader_src, std::string &fragment_shader_src);
-    Shader(std::string &vertex_shader_src, std::string &fragment_shader_src,
-           std::string &geometry_shader_src,
-           std::string &tess_control_shader_src,
-           std::string &tess_eval_shader_src);
+    Shader(std::string vertex_shader_src, 
+           std::string tess_control_shader_src,
+           std::string tess_eval_shader_src,
+           std::string geometry_shader_src,
+           std::string fragment_shader_src);
 
     ~Shader();
 
@@ -23,9 +23,10 @@ public:
     void set_float_uniform(const char *name, float x);
 
     void bind_texture(std::shared_ptr<Object> obj);
+    void bind_texture_depth(GLuint depth_map);
 
-private:
     unsigned int shader_program_;
+private:
 
     char log[512];
 };

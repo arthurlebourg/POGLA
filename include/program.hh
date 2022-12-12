@@ -13,17 +13,9 @@ GLFWwindow *init_window();
 class Program
 {
 public:
-    Program(std::string &vertex_shader_src, std::string &fragment_shader_src, GLFWwindow *window,
-            std::shared_ptr<Scene> scene);
-
-    Program(std::string &vertex_shader_src, std::string &fragment_shader_src,
-            std::string &geometry_shader_src, std::string &tess_control_src,
-            std::string &tess_eval_src, GLFWwindow *window,
-            std::shared_ptr<Scene> scene);
+    Program(GLFWwindow *window, std::shared_ptr<Scene> scene);
 
     ~Program();
-
-    bool is_ready();
 
     void use();
 
@@ -44,8 +36,10 @@ private:
     GLFWwindow *window_;
 
     Shader render_shader_;
+    Shader depth_shader_;
 
-    bool ready_;
+    GLuint depth_map_;
+    GLuint depth_map_fbo_;
 
     float nb_of_updates_per_seconds_ = 12.0f; // 24 updates per seconds or 12 updates per seconds (stop motion standard)
     float time_to_update_seed_ = 1.0 / nb_of_updates_per_seconds_;
