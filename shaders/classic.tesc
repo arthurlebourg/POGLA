@@ -36,8 +36,7 @@ void main()
     float dot_adj = dot(normal_adj, normalize(cam_pos - center_adj));
     if (dot_main * dot_adj > 0)
     {
-        gl_TessLevelOuter[0] = 0.0;
-        gl_TessLevelOuter[1] = 0.0;
+        gl_TessLevelOuter[0] = 0.0; // discards the patch
         return;
     }
     vec4 clipSpace1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
@@ -46,7 +45,6 @@ void main()
     if (clipSpace1.w == 0.0 || clipSpace2.w == 0.0)
     {
         gl_TessLevelOuter[0] = 0.0;
-        gl_TessLevelOuter[1] = 0.0;
         return;
     }
 

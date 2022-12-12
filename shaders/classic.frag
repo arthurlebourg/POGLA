@@ -20,18 +20,25 @@ float LinearizeDepth(float depth)
 }
 void main()
 {
-    //enablePrintf();
-    printf("textureDepth: %f     Depth: %f\n", texture(depth_sampler, gl_FragCoord.xy).r, gl_FragCoord.z);
     //output_color = vec4(vec3(texture(depth_sampler, gl_FragCoord.xy / viewSize).r), 1.0);
     //output_color = texture(texture_sampler, gs_out.uv);
 
-    float depth = LinearizeDepth(gl_FragCoord.z);
-    output_color = vec4(vec3(depth), 1.0);
+    //float depth = LinearizeDepth(gl_FragCoord.z);
+    //output_color = vec4(vec3(depth), 1.0);
+    //output_color = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1.0); // divide by far for demonstration
 
-    /*if (gl_FragCoord.z < texture(depth_sampler, gl_FragCoord.xy).r)
+    float shader_depth = LinearizeDepth(gl_FragCoord.z) / far;
+    float texture_depth = texture(depth_sampler, gl_FragCoord.xy / viewSize).r;
+    output_color = vec4(vec3(texture_depth), 1.0);
+    return;
+
+    //enablePrintf();
+    printf("textureDepth: %f     Depth: %f\n", texture_depth, shader_depth);
+
+    if (LinearizeDepth(gl_FragCoord.z) / far > texture(depth_sampler, gl_FragCoord.xy).r)
         discard;
     
     
     
-    output_color = texture(texture_sampler, gs_out.uv);*/
+    output_color = texture(texture_sampler, gs_out.uv);
 }

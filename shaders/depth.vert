@@ -15,8 +15,6 @@ uniform mat4 transform;
 
 void main()
 {
-    //enablePrintf();
-    //printf("%f %f %f | %f %f %f | %f %f | %f\n", position.x, position.y, position.z, normal.x, normal.y, normal.z, uv.x, uv.y, is_base_triangle);
     gl_Position = transform * vec4(position, 1.0);
     vs_out.normal = normal;
     vs_out.uv = uv;

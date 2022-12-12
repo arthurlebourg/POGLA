@@ -1,6 +1,6 @@
 #version 450
 
-layout(vertices = 3) out;
+layout(vertices = 4) out;
  
 in VS_OUT {
     vec3 normal;

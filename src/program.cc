@@ -163,12 +163,12 @@ Program::Program(GLFWwindow *window,
         std::shared_ptr<Scene> scene)
         : scene_(scene)
         , window_(window)
-        , render_shader_(Shader("shaders/depth.vert", "shaders/depth.tesc",
-                               "shaders/depth.tese", "shaders/depth.geom",
-                               "shaders/depth.frag"))
-        , depth_shader_(Shader("shaders/classic.vert", "shaders/classic.tesc",
+        , render_shader_(Shader("shaders/classic.vert", "shaders/classic.tesc",
                                 "shaders/classic.tese", "shaders/classic.geom",
                                 "shaders/classic.frag"))
+        , depth_shader_(Shader("shaders/depth.vert", "shaders/depth.tesc",
+                               "shaders/depth.tese", "shaders/depth.geom",
+                               "shaders/depth.frag"))
 {
     render_shader_.use();
     TEST_OPENGL_ERROR();
@@ -227,15 +227,17 @@ void Program::render(glm::mat4 const &model_view_matrix,
     render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
     render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
     
-    /*depth_shader_.use();TEST_OPENGL_ERROR();
+    depth_shader_.use();TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
-    depth_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();*/
+    depth_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
     
-    /*GLint m_viewport[4];
+    GLint m_viewport[4];
 
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     
-    depth_shader_.set_vec2_uniform("viewSize", glm::vec2(m_viewport[2], m_viewport[3]));*/
+    render_shader_.use();TEST_OPENGL_ERROR();
+    render_shader_.set_vec2_uniform("viewSize", glm::vec2(m_viewport[2], m_viewport[3]));
+    TEST_OPENGL_ERROR();
 
 
     if (time_to_update_seed_ <= 0.0)
@@ -244,16 +246,16 @@ void Program::render(glm::mat4 const &model_view_matrix,
         float seed = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
         render_shader_.use();TEST_OPENGL_ERROR();
         render_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
-        //depth_shader_.use();TEST_OPENGL_ERROR();
-        //depth_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
+        depth_shader_.use();TEST_OPENGL_ERROR();
+        depth_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
     }
     time_to_update_seed_ -= deltaTime;
     TEST_OPENGL_ERROR();
 
     // depth render
-    /*glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
     depth_shader_.use();TEST_OPENGL_ERROR();
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     TEST_OPENGL_ERROR();
@@ -268,18 +270,18 @@ void Program::render(glm::mat4 const &model_view_matrix,
         depth_shader_.set_mat4_uniform("transform", obj->get_transform());
 
         TEST_OPENGL_ERROR();
-        glPatchParameteri(GL_PATCH_VERTICES, 3);
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
         glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT,
     0); TEST_OPENGL_ERROR();
 
         glBindVertexArray(0);TEST_OPENGL_ERROR();
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);*/
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
     // real render
     render_shader_.use();TEST_OPENGL_ERROR();
-    //render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
+    render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     glClear(
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -288,7 +290,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
     glDepthFunc(GL_LESS); 
     TEST_OPENGL_ERROR();
     //glDepthMask(GL_FALSE);TEST_OPENGL_ERROR();  
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
     for (auto obj : scene_->get_objs())
     {
         glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();

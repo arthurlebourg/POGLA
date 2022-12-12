@@ -227,7 +227,8 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         }
 
         if (pushed_vertices.find({ left_vertex_index, left_normal_index,
-                                   left_uv_index, 0 })
+                                   left_uv_index, is_base_triangle })
+                                   //left_uv_index, 0 })
             == pushed_vertices.end())
         {
             vbo_data.push_back(vertices[left_vertex_index].x);
@@ -238,17 +239,20 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(normals[left_normal_index].z);
             vbo_data.push_back(uvs[left_uv_index].x);
             vbo_data.push_back(uvs[left_uv_index].y);
-            vbo_data.push_back(-1.0);
+            vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
+            //vbo_data.push_back(-1.0);
 
             indices.push_back(counter_index);
             pushed_vertices[{ left_vertex_index, left_normal_index,
-                              left_uv_index, 0 }] = counter_index++;
+                              left_uv_index, is_base_triangle }] = counter_index++;
+                              //left_uv_index, 0 }] = counter_index++;
         }
         else
         {
             indices.push_back(
                 pushed_vertices[{ left_vertex_index, left_normal_index,
-                                  left_uv_index, 0 }]);
+                                  left_uv_index, is_base_triangle }]);
+                                  //left_uv_index, 0 }]);
         }
     }
 }
