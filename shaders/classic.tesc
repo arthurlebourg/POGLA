@@ -45,6 +45,7 @@ void main()
         gl_TessLevelOuter[0] = 0.0; // discards the patch
         return;
     }
+    
     vec4 clipSpace1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
     vec4 clipSpace2 = projection_matrix * model_view_matrix * gl_in[1].gl_Position;
 

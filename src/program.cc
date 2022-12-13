@@ -295,6 +295,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
     TEST_OPENGL_ERROR();
     glDepthFunc(GL_LESS); 
     TEST_OPENGL_ERROR();
+    render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
     for (auto obj : scene_->get_objs())
     {
         glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
@@ -302,7 +303,6 @@ void Program::render(glm::mat4 const &model_view_matrix,
         bindPrintBuffer(render_shader_.shader_program_, printBuffer);
 
         render_shader_.bind_texture(obj);TEST_OPENGL_ERROR();
-        render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 

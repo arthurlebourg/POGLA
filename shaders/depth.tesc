@@ -9,17 +9,46 @@ in VS_OUT {
     float is_double_segment;
 } vs_out[];
 
+uniform mat4 model_view_matrix;
+uniform mat4 projection_matrix;
+
+out TCS_OUT {
+    vec3 normal;
+    vec2 uv;
+    float segment_length;
+} tcs_out[];
+
 void main()
 {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    tcs_out[gl_InvocationID].normal = vs_out[gl_InvocationID].normal;
+    tcs_out[gl_InvocationID].uv = vs_out[gl_InvocationID].uv;
+    tcs_out[gl_InvocationID].segment_length = 1.0;
     if (gl_InvocationID == 0)
     {
-        gl_TessLevelOuter[0] = vs_out[gl_InvocationID].is_base_triangle;
-        gl_TessLevelOuter[1] = vs_out[gl_InvocationID].is_base_triangle;
-        gl_TessLevelOuter[2] = vs_out[gl_InvocationID].is_base_triangle;
-        gl_TessLevelOuter[3] = vs_out[gl_InvocationID].is_base_triangle;
+        vec4 clipSpace1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
+        vec4 clipSpace2 = projection_matrix * model_view_matrix * gl_in[1].gl_Position;
 
-        gl_TessLevelInner[0] = vs_out[gl_InvocationID].is_base_triangle;
-        gl_TessLevelInner[1] = vs_out[gl_InvocationID].is_base_triangle;
+        if (clipSpace1.w == 0.0 || clipSpace2.w == 0.0)
+        {
+            gl_TessLevelOuter[0] = 0.0;
+            return;
+        }
+
+        vec3 ndcSpace1 = clipSpace1.xyz / clipSpace1.w;
+        vec3 ndcSpace2 = clipSpace2.xyz / clipSpace2.w;
+        vec2 ndcSpace1_2d = clamp(ndcSpace1.xy, -1.0, 1.0);
+        vec2 ndcSpace2_2d = clamp(ndcSpace2.xy, -1.0, 1.0);
+
+        float dist = distance(ndcSpace1_2d, ndcSpace2_2d);
+        tcs_out[gl_InvocationID].segment_length = dist;
+        
+        gl_TessLevelOuter[0] = vs_out[gl_InvocationID].is_base_triangle * dist;
+        gl_TessLevelOuter[1] = vs_out[gl_InvocationID].is_base_triangle * dist;
+        gl_TessLevelOuter[2] = vs_out[gl_InvocationID].is_base_triangle * dist;
+        gl_TessLevelOuter[3] = vs_out[gl_InvocationID].is_base_triangle * dist;
+
+        gl_TessLevelInner[0] = vs_out[gl_InvocationID].is_base_triangle * dist;
+        gl_TessLevelInner[1] = vs_out[gl_InvocationID].is_base_triangle * dist;
     }
 }
