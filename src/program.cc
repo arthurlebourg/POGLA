@@ -277,7 +277,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
         depth_shader_.set_mat4_uniform("transform", obj->get_transform());
 
         TEST_OPENGL_ERROR();
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        glPatchParameteri(GL_PATCH_VERTICES, 3);
         glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT,
     0); TEST_OPENGL_ERROR();
 

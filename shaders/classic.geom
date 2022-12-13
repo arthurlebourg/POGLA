@@ -37,21 +37,21 @@ void main()
 
     float coef = 2.50;
 
-    /*gl_Position = clipSpace1;// + vec4(normal * coef * dist, 0.0, 0.0);
+    gl_Position = clipSpace1 + vec4(normal * coef * dist, 0.0, 0.0);
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = clipSpace2;// + vec4(normal * -coef * dist, 0.0, 0.0);
+    gl_Position = clipSpace2 + vec4(normal * -coef * dist, 0.0, 0.0);
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
-    gl_Position = clipSpace1;// + vec4(normal * -coef * dist, 0.0, 0.0);
+    gl_Position = clipSpace1 + vec4(normal * -coef * dist, 0.0, 0.0);
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = clipSpace1;// + vec4(normal * coef * dist, 0.0, 0.0);
+    gl_Position = clipSpace1 + vec4(normal * coef * dist, 0.0, 0.0);
     gs_out.uv = tce_out[0].uv;
-    EmitVertex();*/
+    EmitVertex();
     
     gl_Position = clipSpace2 + vec4(normal * coef * dist, 0.0, 0.0);
     gs_out.uv = tce_out[1].uv;

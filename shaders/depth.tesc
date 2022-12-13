@@ -6,6 +6,7 @@ in VS_OUT {
     vec3 normal;
     vec2 uv;
     float is_base_triangle;
+    float is_double_segment;
 } vs_out[];
 
 void main()

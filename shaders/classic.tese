@@ -35,8 +35,8 @@ void main()
 
     float segment_length = mix(tcs_out[0].segment_length, tcs_out[1].segment_length, gl_TessCoord.x);
     
-    /*vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     float dist = distance(cam_pos, p.xyz);
-    dist /= far;*/
-    gl_Position = p;//+ vec4(n * rand(uv * seed) * segment_length * 1.0, 0.0);
+    dist /= far;
+    gl_Position = p + vec4(n * rand(uv * seed) * dist * 5.0, 0.0);
 }

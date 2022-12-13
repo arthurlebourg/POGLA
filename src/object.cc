@@ -65,30 +65,29 @@ Object::Object(const std::string obj_file, const std::string texture,
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int), &indices_[0], GL_STATIC_DRAW);
     TEST_OPENGL_ERROR();
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float),
                           (void *)0);TEST_OPENGL_ERROR();
     glEnableVertexAttribArray(0);TEST_OPENGL_ERROR();
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float),
                           (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);TEST_OPENGL_ERROR();
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float),
                           (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);TEST_OPENGL_ERROR();
 
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 10 * sizeof(float),
                           (void *)(8 * sizeof(float)));
     glEnableVertexAttribArray(3);TEST_OPENGL_ERROR();
 
-    /*glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+    glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 10 * sizeof(float),
                           (void *)(9 * sizeof(float)));
-    glEnableVertexAttribArray(4);TEST_OPENGL_ERROR();*/
+    glEnableVertexAttribArray(4);TEST_OPENGL_ERROR();
 
     // create a dynamic rigidbody
 
     btConvexHullShape *shape = new btConvexHullShape();
-    //int count = 0;
     for (auto i : vertices_)
     {
         shape->addPoint(btVector3(i.x, i.y, i.z));

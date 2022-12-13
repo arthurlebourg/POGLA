@@ -6,6 +6,7 @@ in VS_OUT {
     vec3 normal;
     vec2 uv;
     float is_base_triangle;
+    float is_double_segment;
 } vs_out[]; // 3 is the adjencent vertex, segment is 0 1
 
 out TCS_OUT {
@@ -19,6 +20,11 @@ uniform mat4 projection_matrix;
 
 void main()
 {
+    if (vs_out[gl_InvocationID].is_double_segment < 0.0)
+    {
+        gl_TessLevelOuter[0] = 0.0; // discards the patch
+        return;
+    }
     tcs_out[gl_InvocationID].normal = vs_out[gl_InvocationID].normal;
     tcs_out[gl_InvocationID].uv = vs_out[gl_InvocationID].uv;
     tcs_out[gl_InvocationID].segment_length = 1.0;

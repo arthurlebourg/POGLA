@@ -115,7 +115,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         }
     }
     
-    std::map<std::array<unsigned int, 4>, unsigned int> pushed_vertices;
+    std::map<std::array<unsigned int, 5>, unsigned int> pushed_vertices;
     std::map<std::pair<unsigned int, unsigned int>, unsigned int> pushed_edges;
 
     int counter_index = 0;
@@ -123,6 +123,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
     {
         unsigned int second_index = i + 1;
         unsigned int is_base_triangle = i % 3 == 0 ? 1 : 0;
+        unsigned int is_double_segment = 0;
         if (i % 3 == 2)
         {
             second_index = i - 2;
@@ -130,6 +131,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         if (pushed_edges.find({ vertexIndices[i], vertexIndices[second_index] }) != pushed_edges.end())
         {
             //continue;
+            is_double_segment = 1;
         }
         else
         {
@@ -151,8 +153,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         unsigned int right_normal_index = halfEdgeToNormal[right_edge];
         unsigned int right_uv_index = halfEdgeToUv[right_edge];
 
-        if (pushed_vertices.find({ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle })
-            == pushed_vertices.end())
+        if (pushed_vertices.find({ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle , is_double_segment }) == pushed_vertices.end())
         {
             vbo_data.push_back(vertices[vertexIndices[i]].x);
             vbo_data.push_back(vertices[vertexIndices[i]].y);
@@ -163,21 +164,23 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(uvs[uvIndices[i]].x);
             vbo_data.push_back(uvs[uvIndices[i]].y);
             vbo_data.push_back(is_base_triangle == 1 ? 1.0f : -1.0f);
+            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
 
             indices.push_back(counter_index);
-            pushed_vertices[{ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle }] =
+            pushed_vertices[{ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle, is_double_segment }] =
                 counter_index++;
         }
         else
         {
             indices.push_back(pushed_vertices[{ vertexIndices[i], normalIndices[i],
-                                                uvIndices[i], is_base_triangle }]);
+                                                uvIndices[i], is_base_triangle, is_double_segment }]);
         }
 
         if (pushed_vertices.find({ vertexIndices[second_index],
                                    normalIndices[second_index],
                                    uvIndices[second_index],
-                                   is_base_triangle }) == pushed_vertices.end())
+                                   is_base_triangle,
+                                   is_double_segment }) == pushed_vertices.end())
         {
             vbo_data.push_back(vertices[vertexIndices[second_index]].x);
             vbo_data.push_back(vertices[vertexIndices[second_index]].y);
@@ -188,21 +191,23 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(uvs[uvIndices[second_index]].x);
             vbo_data.push_back(uvs[uvIndices[second_index]].y);
             vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
+            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
 
             indices.push_back(counter_index);
             pushed_vertices[{ vertexIndices[second_index],
                               normalIndices[second_index],
-                              uvIndices[second_index], is_base_triangle }] = counter_index++;
+                              uvIndices[second_index], is_base_triangle, is_double_segment }] = counter_index++;
         }
         else
         {
             indices.push_back(pushed_vertices[{ vertexIndices[second_index],
                                                 normalIndices[second_index],
-                                                uvIndices[second_index], is_base_triangle }]);
+                                                uvIndices[second_index], is_base_triangle
+                                                , is_double_segment }]);
         }
         
         if (pushed_vertices.find({ right_vertex_index, right_normal_index,
-                                   right_uv_index, is_base_triangle })
+                                   right_uv_index, is_base_triangle, is_double_segment })
             == pushed_vertices.end())
         {
             vbo_data.push_back(vertices[right_vertex_index].x);
@@ -214,20 +219,21 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(uvs[right_uv_index].x);
             vbo_data.push_back(uvs[right_uv_index].y);
             vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
+            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
 
             indices.push_back(counter_index);
             pushed_vertices[{ right_vertex_index, right_normal_index,
-                              right_uv_index, is_base_triangle }] = counter_index++;
+                              right_uv_index, is_base_triangle, is_double_segment }] = counter_index++;
         }
         else
         {
             indices.push_back(
                 pushed_vertices[{ right_vertex_index, right_normal_index,
-                                  right_uv_index, is_base_triangle }]);
+                                  right_uv_index, is_base_triangle, is_double_segment }]);
         }
 
         if (pushed_vertices.find({ left_vertex_index, left_normal_index,
-                                   left_uv_index, is_base_triangle })
+                                   left_uv_index, is_base_triangle, is_double_segment })
                                    //left_uv_index, 0 })
             == pushed_vertices.end())
         {
@@ -241,17 +247,18 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
             vbo_data.push_back(uvs[left_uv_index].y);
             vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
             //vbo_data.push_back(-1.0);
+            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
 
             indices.push_back(counter_index);
             pushed_vertices[{ left_vertex_index, left_normal_index,
-                              left_uv_index, is_base_triangle }] = counter_index++;
+                              left_uv_index, is_base_triangle, is_double_segment }] = counter_index++;
                               //left_uv_index, 0 }] = counter_index++;
         }
         else
         {
             indices.push_back(
                 pushed_vertices[{ left_vertex_index, left_normal_index,
-                                  left_uv_index, is_base_triangle }]);
+                                  left_uv_index, is_base_triangle, is_double_segment }]);
                                   //left_uv_index, 0 }]);
         }
     }
