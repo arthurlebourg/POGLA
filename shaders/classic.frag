@@ -27,8 +27,5 @@ void main()
         //output_color = vec4(0.0, 1.0, 0.0, 0.0);
         discard;
     }
-    else
-    {
-        output_color = texture(texture_sampler, gs_out.uv);
-    }
+    output_color = texture(texture_sampler, gs_out.uv);
 }

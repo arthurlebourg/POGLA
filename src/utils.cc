@@ -117,7 +117,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
     
     std::map<std::array<unsigned int, 5>, unsigned int> pushed_vertices;
     std::map<std::pair<unsigned int, unsigned int>, unsigned int> pushed_edges;
-
+    
     int counter_index = 0;
     for (unsigned int i = 0; i < vertexIndices.size(); i++)
     {
@@ -152,6 +152,7 @@ void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
         unsigned int right_vertex_index = halfEdgeToVertex[right_edge];
         unsigned int right_normal_index = halfEdgeToNormal[right_edge];
         unsigned int right_uv_index = halfEdgeToUv[right_edge];
+
 
         if (pushed_vertices.find({ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle , is_double_segment }) == pushed_vertices.end())
         {
