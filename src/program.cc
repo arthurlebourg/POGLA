@@ -87,7 +87,9 @@ void framebuffer_size_callback(GLFWwindow *, int width, int height)
 {
     win_w = width;
     win_h = height;
+
     glViewport(0, 0, width, height);
+    prog->update_depth_texture();
 }
 
 void processInput(GLFWwindow *window)
@@ -122,6 +124,41 @@ void Program::display()
 std::shared_ptr<Scene> Program::get_scene()
 {
     return scene_;
+}
+
+void Program::update_depth_texture()
+{
+    glDeleteTextures(1, &depth_map_);
+    GLint m_viewport[4];
+
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    TEST_OPENGL_ERROR();
+    
+    glGenFramebuffers(1, &depth_map_fbo_);TEST_OPENGL_ERROR();
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);TEST_OPENGL_ERROR();
+    glGenTextures(1, &depth_map_);TEST_OPENGL_ERROR();
+
+    glBindTexture(GL_TEXTURE_2D, depth_map_);TEST_OPENGL_ERROR();
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_viewport[2], m_viewport[3], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depth_map_, 0);
+    // attach depth texture as FBO's depth buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+                           depth_map_, 0);
+    
+
+    std::cout << "width " << m_viewport[2] << " height " << m_viewport[3] << std::endl;
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_viewport[2], m_viewport[3]); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    TEST_OPENGL_ERROR();
 }
 
 GLFWwindow *init_window()
@@ -175,37 +212,8 @@ Program::Program(GLFWwindow *window,
 
     glfwSetCursorPosCallback(window, mouse_motion_callback);
     glfwSetKeyCallback(window, keyboard_callback);
-    
-    GLint m_viewport[4];
 
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-    TEST_OPENGL_ERROR();
-    
-    glGenFramebuffers(1, &depth_map_fbo_);
-    TEST_OPENGL_ERROR();
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
-    TEST_OPENGL_ERROR();
-    // create depth texture
-    glGenTextures(1, &depth_map_);
-    TEST_OPENGL_ERROR();
-    glActiveTexture(GL_TEXTURE1);
-    TEST_OPENGL_ERROR();
-    glBindTexture(GL_TEXTURE_2D, depth_map_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_viewport[2],
-                 m_viewport[3], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = {1.0, 1.0, 1.0, 1.0};
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-    // attach depth texture as FBO's depth buffer
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                           depth_map_, 0);
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    TEST_OPENGL_ERROR();
+    update_depth_texture();
 }
 
 Program::~Program()
@@ -253,9 +261,8 @@ void Program::render(glm::mat4 const &model_view_matrix,
     TEST_OPENGL_ERROR();
 
     // depth render
-    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
     depth_shader_.use();TEST_OPENGL_ERROR();
-    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     TEST_OPENGL_ERROR();
@@ -281,7 +288,6 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
     // real render
     render_shader_.use();TEST_OPENGL_ERROR();
-    render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     glClear(
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -289,8 +295,6 @@ void Program::render(glm::mat4 const &model_view_matrix,
     TEST_OPENGL_ERROR();
     glDepthFunc(GL_LESS); 
     TEST_OPENGL_ERROR();
-    //glDepthMask(GL_FALSE);TEST_OPENGL_ERROR();  
-    //glEnable(GL_CULL_FACE);
     for (auto obj : scene_->get_objs())
     {
         glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
@@ -298,6 +302,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
         bindPrintBuffer(render_shader_.shader_program_, printBuffer);
 
         render_shader_.bind_texture(obj);TEST_OPENGL_ERROR();
+        render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
 
         render_shader_.set_mat4_uniform("transform", obj->get_transform());
 
@@ -305,10 +310,9 @@ void Program::render(glm::mat4 const &model_view_matrix,
         glPatchParameteri(GL_PATCH_VERTICES, 4);
         glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT, 0);
         TEST_OPENGL_ERROR();
-        printf("\n\nGLSL print:\n%s\n", getPrintBufferString(printBuffer).c_str());
+        //printf("\n\nGLSL print:\n%s\n", getPrintBufferString(printBuffer).c_str());
         deletePrintBuffer(printBuffer);
         glBindVertexArray(0);TEST_OPENGL_ERROR();
-        //exit(0);
     }
 
     glfwSwapBuffers(window_);

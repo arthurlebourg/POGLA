@@ -120,13 +120,13 @@ Object::Object(const std::string obj_file, const std::string texture,
                                                     colShape_, localInertia);
     body_ = new btRigidBody(rbInfo);
 
-    GLint texture_units, combined_texture_units;
+    /*GLint texture_units, combined_texture_units;
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &texture_units);
     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &combined_texture_units);
-
+    */
     glGenTextures(1, &texture_id_);
     TEST_OPENGL_ERROR();
-    glActiveTexture(GL_TEXTURE0);
+    //glActiveTexture(GL_TEXTURE0);
     TEST_OPENGL_ERROR();
     glBindTexture(GL_TEXTURE_2D, texture_id_);
     TEST_OPENGL_ERROR();
@@ -134,14 +134,12 @@ Object::Object(const std::string obj_file, const std::string texture,
                  GL_RGB, GL_UNSIGNED_BYTE, texture_->pixels);
     TEST_OPENGL_ERROR();
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    TEST_OPENGL_ERROR();
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    TEST_OPENGL_ERROR();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    TEST_OPENGL_ERROR();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    TEST_OPENGL_ERROR();
 };
 
 
