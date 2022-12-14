@@ -207,8 +207,8 @@ Program::Program(GLFWwindow *window,
                                "shaders/depth.tese", "shaders/depth.geom",
                                "shaders/depth.frag"))
 {
-    render_shader_.use();
-    TEST_OPENGL_ERROR();
+    render_shader_.use();TEST_OPENGL_ERROR();
+    depth_shader_.use();
 
     glfwSetCursorPosCallback(window, mouse_motion_callback);
     glfwSetKeyCallback(window, keyboard_callback);
@@ -229,12 +229,10 @@ GLFWwindow *Program::get_window()
 void Program::render(glm::mat4 const &model_view_matrix,
                      glm::mat4 const &projection_matrix, float deltaTime)
 {
-
     render_shader_.use();TEST_OPENGL_ERROR();
     //render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
     render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
     render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
-    
     depth_shader_.use();TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
@@ -252,8 +250,10 @@ void Program::render(glm::mat4 const &model_view_matrix,
     {
         time_to_update_seed_ = 1.0 / nb_of_updates_per_seconds_;
         float seed = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
         render_shader_.use();TEST_OPENGL_ERROR();
         render_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
+        
         depth_shader_.use();TEST_OPENGL_ERROR();
         depth_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
     }
@@ -272,16 +272,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
     TEST_OPENGL_ERROR();
     for (auto obj : scene_->get_objs())
     {
-        glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
-
-        depth_shader_.set_mat4_uniform("transform", obj->get_transform());
-
-        TEST_OPENGL_ERROR();
-        glPatchParameteri(GL_PATCH_VERTICES, 3);
-        glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT,
-    0); TEST_OPENGL_ERROR();
-
-        glBindVertexArray(0);TEST_OPENGL_ERROR();
+        obj->draw_triangles(depth_shader_);
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -298,21 +289,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
     render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
     for (auto obj : scene_->get_objs())
     {
-        glBindVertexArray(obj->get_VAO());TEST_OPENGL_ERROR();
-        GLuint printBuffer = createPrintBuffer();
-        bindPrintBuffer(render_shader_.shader_program_, printBuffer);
-
-        render_shader_.bind_texture(obj);TEST_OPENGL_ERROR();
-
-        render_shader_.set_mat4_uniform("transform", obj->get_transform());
-
-        TEST_OPENGL_ERROR();
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
-        glDrawElements(GL_PATCHES, obj->get_indices_number(), GL_UNSIGNED_INT, 0);
-        TEST_OPENGL_ERROR();
-        //printf("\n\nGLSL print:\n%s\n", getPrintBufferString(printBuffer).c_str());
-        deletePrintBuffer(printBuffer);
-        glBindVertexArray(0);TEST_OPENGL_ERROR();
+        obj->draw_segments(render_shader_);
     }
 
     glfwSwapBuffers(window_);

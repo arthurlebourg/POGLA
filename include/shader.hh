@@ -1,6 +1,5 @@
 #pragma once
 
-#include "object.hh"
 #include "utils.hh"
 
 class Shader
@@ -16,16 +15,16 @@ public:
 
     ~Shader();
 
-    void use();
+    void use() const;
 
-    void set_mat4_uniform(const char *name, glm::mat4 mat);
-    void set_mat4_uniform(const char *name, btScalar *mat);
-    void set_vec2_uniform(const char *name, glm::vec2 vec);
-    void set_vec3_uniform(const char *name, glm::vec3 vec);
-    void set_float_uniform(const char *name, float x);
+    void set_mat4_uniform(const char *name, glm::mat4 mat) const;
+    void set_mat4_uniform(const char *name, btScalar *mat) const; 
+    void set_vec2_uniform(const char *name, glm::vec2 vec) const;
+    void set_vec3_uniform(const char *name, glm::vec3 vec) const;
+    void set_float_uniform(const char *name, float x) const;
 
-    void bind_texture(std::shared_ptr<Object> obj);
-    void bind_texture_depth(GLuint depth_map);
+    //void bind_texture(std::shared_ptr<Object> obj);
+    void bind_texture_depth(GLuint depth_map) const;
 
     unsigned int shader_program_;
 private:

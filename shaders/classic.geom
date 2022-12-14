@@ -5,10 +5,12 @@ layout (triangle_strip, max_vertices = 8) out;
 
 in TCE_OUT {
     vec3 normal;
+    vec3 color;
     vec2 uv;
 } tce_out[];
 
 out GS_OUT {
+    vec3 color;
     vec2 uv;
 } gs_out;
 
@@ -38,30 +40,37 @@ void main()
     float coef = 2.50;
 
     gl_Position = clipSpace1 + vec4(normal * coef * dist, 0.0, 0.0);
+    gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
     gl_Position = clipSpace2 + vec4(normal * -coef * dist, 0.0, 0.0);
+    gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
     gl_Position = clipSpace1 + vec4(normal * -coef * dist, 0.0, 0.0);
+    gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
     gl_Position = clipSpace1 + vec4(normal * coef * dist, 0.0, 0.0);
+    gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
     
     gl_Position = clipSpace2 + vec4(normal * coef * dist, 0.0, 0.0);
+    gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
     gl_Position = clipSpace2 + vec4(normal * -coef * dist, 0.0, 0.0);
+    gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
 
     gl_Position = clipSpace1 + vec4(normal * coef * dist, 0.0, 0.0);
+    gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
     

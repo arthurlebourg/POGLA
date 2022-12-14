@@ -6,12 +6,14 @@ Object::Object(const std::string obj_file, const std::string texture,
     , transform_(glm::mat4(1.0f))
     , mass_(obj_mass)
     , texture_(tifo::load_image(texture.c_str()))
+    , mesh_triangles_(Mesh(3))
+    , mesh_segments_(Mesh(4))
 {
-    unsigned int VBO;
-    std::vector<float> vbo_data;
-    load_obj(obj_file.c_str(), vertices_, uv_, normals_, indices_, vbo_data);
-    vertices_number_ = vertices_.size();
-    indices_number_ = indices_.size();
+    load_obj(obj_file.c_str(), mesh_triangles_, mesh_segments_);
+    //unsigned int VBO;
+    //load_obj(obj_file.c_str(), vertices_, uv_, normals_, indices_, vbo_data);
+    //vertices_number_ = vertices_.size();
+    //indices_number_ = indices_.size();
 
     /*int n = 0;
 
@@ -45,7 +47,7 @@ Object::Object(const std::string obj_file, const std::string texture,
 
     
     
-    glGenBuffers(1, &VBO);
+    /*glGenBuffers(1, &VBO);
     TEST_OPENGL_ERROR();
     glGenBuffers(1, &EBO_);
     TEST_OPENGL_ERROR();
@@ -83,13 +85,16 @@ Object::Object(const std::string obj_file, const std::string texture,
 
     glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 10 * sizeof(float),
                           (void *)(9 * sizeof(float)));
-    glEnableVertexAttribArray(4);TEST_OPENGL_ERROR();
+    glEnableVertexAttribArray(4);TEST_OPENGL_ERROR();*/
 
     // create a dynamic rigidbody
 
     btConvexHullShape *shape = new btConvexHullShape();
-    for (auto i : vertices_)
+
+    //std::cout << "Vertices: " << mesh_.get_vertices().size() << std::endl;
+    for (auto v : mesh_triangles_.get_vertices())
     {
+        auto i = v.pos_;
         shape->addPoint(btVector3(i.x, i.y, i.z));
     }
     shape->optimizeConvexHull();
@@ -142,7 +147,7 @@ Object::Object(const std::string obj_file, const std::string texture,
 };
 
 
-unsigned int Object::get_VAO()
+/*unsigned int Object::get_VAO()
 {
     return VAO_;
 }
@@ -155,7 +160,7 @@ unsigned int Object::get_vertices_number()
 unsigned int Object::get_indices_number()
 {
     return indices_number_;
-}
+}*/
 
 unsigned int Object::get_texture()
 {
@@ -203,4 +208,34 @@ glm::vec3 Object::get_position()
 btCollisionShape *Object::get_colShape()
 {
     return colShape_;
+}
+
+void Object::draw_triangles(const Shader &shader)
+{
+    //shader.use();
+    glActiveTexture(GL_TEXTURE0);TEST_OPENGL_ERROR();
+    glBindTexture(GL_TEXTURE_2D, texture_id_);TEST_OPENGL_ERROR();
+    unsigned tex_location =
+        glGetUniformLocation(shader.shader_program_, "texture_sampler");TEST_OPENGL_ERROR();
+    glUniform1i(tex_location, 0);
+    TEST_OPENGL_ERROR();
+    shader.set_mat4_uniform("transform", transform_);
+    TEST_OPENGL_ERROR();
+    mesh_triangles_.draw();
+    TEST_OPENGL_ERROR();
+}
+
+void Object::draw_segments(const Shader &shader)
+{
+    //shader.use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_id_);
+    unsigned tex_location =
+        glGetUniformLocation(shader.shader_program_, "texture_sampler");
+    glUniform1i(tex_location, 0);
+    TEST_OPENGL_ERROR();
+    shader.set_mat4_uniform("transform", transform_);
+    TEST_OPENGL_ERROR();
+    mesh_segments_.draw();
+    TEST_OPENGL_ERROR();
 }

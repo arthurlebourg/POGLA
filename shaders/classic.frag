@@ -1,6 +1,7 @@
 #version 450
 
 in GS_OUT {
+    vec3 color;
     vec2 uv;
 } gs_out;
 
@@ -27,5 +28,5 @@ void main()
         //output_color = vec4(0.0, 1.0, 0.0, 0.0);
         discard;
     }
-    output_color = texture(texture_sampler, gs_out.uv);
+    output_color = vec4(gs_out.color, 1.0) * texture(texture_sampler, gs_out.uv);
 }

@@ -1,4 +1,6 @@
 #include "utils.hh"
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
 
 void test_opengl_error(std::string func, std::string file, int line)
 {
@@ -40,229 +42,209 @@ void test_opengl_error(std::string func, std::string file, int line)
         std::cerr << "UNKONWN ERROR\n";
         break;
     }
+    exit(1);
 }
 
-void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
-              std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals, 
-              std::vector<unsigned int> &indices, std::vector<float> &vbo_data)
+void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
 {
-    std::ifstream file(filename);
-    std::string line;
-    std::vector<unsigned int> vertexIndices;
-    std::vector<unsigned int> uvIndices;
-    std::vector<unsigned int> normalIndices;
+    tinyobj::ObjReaderConfig reader_config;
+    reader_config.mtl_search_path = "./objects/"; // Path to material files
 
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToVertex;
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToNormal;
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> halfEdgeToUv;
-    
-    while (file >> line)
+    tinyobj::ObjReader reader;
+
+    if (!reader.ParseFromFile(filename, reader_config))
     {
-        GLfloat v1;
-        GLfloat v2;
-        GLfloat v3;
-        if (!line.compare("v"))
+        if (!reader.Error().empty())
         {
-            file >> v1 >> v2 >> v3;
-            vertices.push_back(glm::vec3(v1, v2, v3));
+            std::cerr << "TinyObjReader: " << reader.Error();
         }
-        else if (!line.compare("vt"))
-        {
-            file >> v1 >> v2;
-            uvs.push_back(glm::vec2(v1, v2));
-        }
-        else if (!line.compare("vn"))
-        {
-            file >> v1 >> v2 >> v3;
-            normals.push_back(glm::vec3(v1, v2, v3));
-        }
-        else if (!line.compare("f"))
-        {
-            char slash; // unused
-            size_t v1, vn1, vt1, v2, vn2, vt2, v3, vn3, vt3;
-            file >> v1 >> slash >> vt1 >> slash >> vn1;
-            v1--;
-            vt1--;
-            vn1--;
-            file >> v2 >> slash >> vt2 >> slash >> vn2;
-            v2--;
-            vt2--;
-            vn2--;
-            file >> v3 >> slash >> vt3 >> slash >> vn3;
-            v3--;
-            vt3--;
-            vn3--;
-            vertexIndices.push_back(v1);
-            vertexIndices.push_back(v2);
-            vertexIndices.push_back(v3);
-            uvIndices.push_back(vt1);
-            uvIndices.push_back(vt2);
-            uvIndices.push_back(vt3);
-            normalIndices.push_back(vn1);
-            normalIndices.push_back(vn2);
-            normalIndices.push_back(vn3);
-            halfEdgeToVertex[std::make_pair(v1, v2)] = v3;
-            halfEdgeToNormal[std::make_pair(v1, v2)] = vn3;
-            halfEdgeToUv[std::make_pair(v1, v2)] = vt3;
-
-            halfEdgeToVertex[std::make_pair(v2, v3)] = v1;
-            halfEdgeToNormal[std::make_pair(v2, v3)] = vn1;
-            halfEdgeToUv[std::make_pair(v2, v3)] = vt1;
-
-            halfEdgeToVertex[std::make_pair(v3, v1)] = v2;
-            halfEdgeToNormal[std::make_pair(v3, v1)] = vn2;
-            halfEdgeToUv[std::make_pair(v3, v1)] = vt2;
-        }
+        exit(1);
     }
-    
-    std::map<std::array<unsigned int, 5>, unsigned int> pushed_vertices;
-    std::map<std::pair<unsigned int, unsigned int>, unsigned int> pushed_edges;
+
+    if (!reader.Warning().empty())
+    {
+        std::cout << "TinyObjReader: " << reader.Warning();
+    }
+
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices_triangles;
+    std::vector<unsigned int> indices_segments;
+
+    std::map<Vertex, unsigned int> pushed_vertices;
+    std::set<std::pair<Vertex, Vertex>> pushed_edges;
+
+    auto& attrib = reader.GetAttrib();
+    auto& shapes = reader.GetShapes();
+    auto& materials = reader.GetMaterials();
+
+    std::map<std::pair<Vertex, Vertex>, size_t> half_edge_to_vertex_index;
     
     int counter_index = 0;
-    for (unsigned int i = 0; i < vertexIndices.size(); i++)
+    // Loop over shapes
+    for (size_t s = 0; s < shapes.size(); s++)
     {
-        unsigned int second_index = i + 1;
-        unsigned int is_base_triangle = i % 3 == 0 ? 1 : 0;
-        unsigned int is_double_segment = 0;
-        if (i % 3 == 2)
+        // Loop over faces(polygon)
+        size_t index_offset = 0;
+        for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
         {
-            second_index = i - 2;
-        }
-        if (pushed_edges.find({ vertexIndices[i], vertexIndices[second_index] }) != pushed_edges.end())
-        {
-            //continue;
-            is_double_segment = 1;
-        }
-        else
-        {
-            pushed_edges[std::make_pair(vertexIndices[i], vertexIndices[second_index])] = counter_index;
-            pushed_edges[std::make_pair(vertexIndices[second_index], vertexIndices[i])] = counter_index;
-        }
+            size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+            if (fv != 3)
+            {
+                std::cerr << "Error: face with " << fv << " vertices. please use triangulated faces" << std::endl;
+                exit(1);
+            }
+            std::array<size_t, 3> face_vertices;
 
-        std::pair<unsigned int, unsigned int> left_edge =
-            std::make_pair(vertexIndices[second_index], vertexIndices[i]); // left is the adjacent vertex
+            // Optional: vertex colors
+            tinyobj::real_t red = 1.0;
+            tinyobj::real_t green = 1.0;
+            tinyobj::real_t blue = 1.0;
+            // per-face material
+            if (shapes[s].mesh.material_ids.size() > 0 && materials.size() > 0)
+            {
+                size_t mv = shapes[s].mesh.material_ids[f]; // https://fr.wikipedia.org/wiki/Material_Template_Library
+                auto mat = materials[mv];
+                //red = mat.ambient[0];
+                //green = mat.ambient[1];
+                //blue = mat.ambient[2];
+                red = mat.diffuse[0];
+                green = mat.diffuse[1];
+                blue = mat.diffuse[2];
+                
+                /*std::cout << std::endl << "material " << mv << " " << mat.name
+                << std::endl; std::cout << "ambient " << mat.ambient[0] << " "
+                << mat.ambient[1] << " " << mat.ambient[2] << std::endl;
+                std::cout << "diffuse " << mat.diffuse[0] << " " <<
+                mat.diffuse[1] << " " << mat.diffuse[2] << std::endl; std::cout
+                << "specular " << mat.specular[0] << " " << mat.specular[1] << "
+                " << mat.specular[2] << std::endl; std::cout << "transmittance "
+                << mat.transmittance[0] << " " << mat.transmittance[1] << " " <<
+                mat.transmittance[2] << std::endl; std::cout << "emission " <<
+                mat.emission[0] << " " << mat.emission[1] << " " <<
+                mat.emission[2] << std::endl; std::cout << "shininess " <<
+                mat.shininess << std::endl; std::cout << "ior " << mat.ior <<
+                std::endl; std::cout << "dissolve " << mat.dissolve <<
+                std::endl; std::cout << "illum " << mat.illum << std::endl;
+                std::cout << "ambient_texname " << mat.ambient_texname <<
+                std::endl; std::cout << "diffuse_texname " <<
+                mat.diffuse_texname << std::endl; std::cout << "specular_texname
+                " << mat.specular_texname << std::endl; std::cout <<
+                "specular_highlight_texname " << mat.specular_highlight_texname
+                << std::endl; std::cout << "bump_texname " << mat.bump_texname
+                << std::endl; std::cout << "displacement_texname " <<
+                mat.displacement_texname << std::endl; std::cout <<
+                "alpha_texname " << mat.alpha_texname << std::endl; std::cout <<
+                "roughness_texname " << mat.roughness_texname << std::endl;
+                std::cout << "metallic_texname " << mat.metallic_texname <<
+                std::endl; std::cout << "sheen_texname " << mat.sheen_texname <<
+                std::endl; std::cout << "emissive_texname " <<
+                mat.emissive_texname << std::endl; std::cout << "normal_texname
+                " << mat.normal_texname << std::endl; std::cout <<
+                "unknown_parameter " << mat.unknown_parameter.size() <<
+                std::endl;*/
+            }
+            // Loop over vertices in the face.
+            for (size_t v = 0; v < fv; v++)
+            {
+                // access to vertex
+                tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+                tinyobj::real_t vx =
+                    attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+                tinyobj::real_t vy =
+                    attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+                tinyobj::real_t vz =
+                    attrib.vertices[3 * size_t(idx.vertex_index) + 2];
 
-        std::pair<unsigned int, unsigned int> right_edge =
-            std::make_pair(vertexIndices[i], vertexIndices[second_index]);
+                // Check if `normal_index` is zero or positive. negative = no
+                // normal data
 
-        unsigned int left_vertex_index = halfEdgeToVertex[left_edge];
-        unsigned int left_normal_index = halfEdgeToNormal[left_edge];
-        unsigned int left_uv_index = halfEdgeToUv[left_edge];
-        
-        unsigned int right_vertex_index = halfEdgeToVertex[right_edge];
-        unsigned int right_normal_index = halfEdgeToNormal[right_edge];
-        unsigned int right_uv_index = halfEdgeToUv[right_edge];
+                tinyobj::real_t nx = 0.0;
+                tinyobj::real_t ny = 0.0;
+                tinyobj::real_t nz = 0.0;
+                if (idx.normal_index >= 0)
+                {
+                    nx =
+                        attrib.normals[3 * size_t(idx.normal_index) + 0];
+                    ny =
+                        attrib.normals[3 * size_t(idx.normal_index) + 1];
+                    nz =
+                        attrib.normals[3 * size_t(idx.normal_index) + 2];   
+                }
 
+                // Check if `texcoord_index` is zero or positive. negative = no
+                // texcoord data
 
-        if (pushed_vertices.find({ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle , is_double_segment }) == pushed_vertices.end())
-        {
-            vbo_data.push_back(vertices[vertexIndices[i]].x);
-            vbo_data.push_back(vertices[vertexIndices[i]].y);
-            vbo_data.push_back(vertices[vertexIndices[i]].z);
-            vbo_data.push_back(normals[normalIndices[i]].x);
-            vbo_data.push_back(normals[normalIndices[i]].y);
-            vbo_data.push_back(normals[normalIndices[i]].z);
-            vbo_data.push_back(uvs[uvIndices[i]].x);
-            vbo_data.push_back(uvs[uvIndices[i]].y);
-            vbo_data.push_back(is_base_triangle == 1 ? 1.0f : -1.0f);
-            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
+                tinyobj::real_t tx = 0.0;
+                tinyobj::real_t ty = 0.0;
+                if (idx.texcoord_index >= 0)
+                {
+                    tx =
+                        attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
+                    ty =
+                        attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+                }
 
-            indices.push_back(counter_index);
-            pushed_vertices[{ vertexIndices[i], normalIndices[i], uvIndices[i], is_base_triangle, is_double_segment }] =
-                counter_index++;
-        }
-        else
-        {
-            indices.push_back(pushed_vertices[{ vertexIndices[i], normalIndices[i],
-                                                uvIndices[i], is_base_triangle, is_double_segment }]);
-        }
+                /*if (attrib.colors.size() > 0)
+                {
+                    red =
+                        attrib.colors[3 * size_t(idx.vertex_index) + 0];
+                    green =
+                        attrib.colors[3 * size_t(idx.vertex_index) + 1];
+                    blue =
+                        attrib.colors[3 * size_t(idx.vertex_index) + 2];
+                }*/
+                
+                Vertex vertex(glm::vec3(vx, vy, vz), glm::vec3(nx, ny, nz), glm::vec3(red, green, blue), glm::vec2(tx, ty));
+                if (pushed_vertices.find(vertex) != pushed_vertices.end())
+                {
+                    indices_triangles.push_back(pushed_vertices[vertex]);
+                    face_vertices[v] = pushed_vertices[vertex];
+                }
+                else
+                {
+                    vertices.push_back(vertex);
+                    indices_triangles.push_back(counter_index);
+                    face_vertices[v] = counter_index;
+                    pushed_vertices[vertex] = counter_index++;
+                }
+            }
+            index_offset += fv;
+            half_edge_to_vertex_index[std::make_pair(vertices[face_vertices[0]], vertices[face_vertices[1]])] = face_vertices[2];
+            half_edge_to_vertex_index[std::make_pair(vertices[face_vertices[1]], vertices[face_vertices[2]])] = face_vertices[0];
+            half_edge_to_vertex_index[std::make_pair(vertices[face_vertices[2]], vertices[face_vertices[0]])] = face_vertices[1];
 
-        if (pushed_vertices.find({ vertexIndices[second_index],
-                                   normalIndices[second_index],
-                                   uvIndices[second_index],
-                                   is_base_triangle,
-                                   is_double_segment }) == pushed_vertices.end())
-        {
-            vbo_data.push_back(vertices[vertexIndices[second_index]].x);
-            vbo_data.push_back(vertices[vertexIndices[second_index]].y);
-            vbo_data.push_back(vertices[vertexIndices[second_index]].z);
-            vbo_data.push_back(normals[normalIndices[second_index]].x);
-            vbo_data.push_back(normals[normalIndices[second_index]].y);
-            vbo_data.push_back(normals[normalIndices[second_index]].z);
-            vbo_data.push_back(uvs[uvIndices[second_index]].x);
-            vbo_data.push_back(uvs[uvIndices[second_index]].y);
-            vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
-            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
-
-            indices.push_back(counter_index);
-            pushed_vertices[{ vertexIndices[second_index],
-                              normalIndices[second_index],
-                              uvIndices[second_index], is_base_triangle, is_double_segment }] = counter_index++;
-        }
-        else
-        {
-            indices.push_back(pushed_vertices[{ vertexIndices[second_index],
-                                                normalIndices[second_index],
-                                                uvIndices[second_index], is_base_triangle
-                                                , is_double_segment }]);
-        }
-        
-        if (pushed_vertices.find({ right_vertex_index, right_normal_index,
-                                   right_uv_index, is_base_triangle, is_double_segment })
-            == pushed_vertices.end())
-        {
-            vbo_data.push_back(vertices[right_vertex_index].x);
-            vbo_data.push_back(vertices[right_vertex_index].y);
-            vbo_data.push_back(vertices[right_vertex_index].z);
-            vbo_data.push_back(normals[right_normal_index].x);
-            vbo_data.push_back(normals[right_normal_index].y);
-            vbo_data.push_back(normals[right_normal_index].z);
-            vbo_data.push_back(uvs[right_uv_index].x);
-            vbo_data.push_back(uvs[right_uv_index].y);
-            vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
-            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
-
-            indices.push_back(counter_index);
-            pushed_vertices[{ right_vertex_index, right_normal_index,
-                              right_uv_index, is_base_triangle, is_double_segment }] = counter_index++;
-        }
-        else
-        {
-            indices.push_back(
-                pushed_vertices[{ right_vertex_index, right_normal_index,
-                                  right_uv_index, is_base_triangle, is_double_segment }]);
-        }
-
-        if (pushed_vertices.find({ left_vertex_index, left_normal_index,
-                                   left_uv_index, is_base_triangle, is_double_segment })
-                                   //left_uv_index, 0 })
-            == pushed_vertices.end())
-        {
-            vbo_data.push_back(vertices[left_vertex_index].x);
-            vbo_data.push_back(vertices[left_vertex_index].y);
-            vbo_data.push_back(vertices[left_vertex_index].z);
-            vbo_data.push_back(normals[left_normal_index].x);
-            vbo_data.push_back(normals[left_normal_index].y);
-            vbo_data.push_back(normals[left_normal_index].z);
-            vbo_data.push_back(uvs[left_uv_index].x);
-            vbo_data.push_back(uvs[left_uv_index].y);
-            vbo_data.push_back(is_base_triangle == 1 ? 1.0 : -1.0f);
-            //vbo_data.push_back(-1.0);
-            vbo_data.push_back(is_double_segment == 1 ? -1.0f : 1.0f);
-
-            indices.push_back(counter_index);
-            pushed_vertices[{ left_vertex_index, left_normal_index,
-                              left_uv_index, is_base_triangle, is_double_segment }] = counter_index++;
-                              //left_uv_index, 0 }] = counter_index++;
-        }
-        else
-        {
-            indices.push_back(
-                pushed_vertices[{ left_vertex_index, left_normal_index,
-                                  left_uv_index, is_base_triangle, is_double_segment }]);
-                                  //left_uv_index, 0 }]);
         }
     }
+
+    triangle_mesh.load_mesh(vertices, indices_triangles);
+    
+    for (size_t i = 0; i < indices_triangles.size(); i++)
+    {
+        size_t next_index = i % 3 == 2 ? i - 2 : i + 1;
+        Vertex v1 = vertices[indices_triangles[i]];
+        Vertex v2 = vertices[indices_triangles[next_index]];
+        if (pushed_edges.find(std::make_pair(v1, v2)) != pushed_edges.end())
+        {
+            continue;
+        }
+        pushed_edges.insert(std::make_pair(v1, v2));
+        pushed_edges.insert(std::make_pair(v2, v1));
+
+        std::pair<Vertex, Vertex> left_edge =
+            std::make_pair(v2, v1); // left is the adjacent vertex
+
+        std::pair<Vertex, Vertex> right_edge =
+            std::make_pair(v1, v2);
+
+        size_t left_vertex = half_edge_to_vertex_index[left_edge];
+        size_t right_vertex = half_edge_to_vertex_index[right_edge];
+
+        indices_segments.push_back(indices_triangles[i]);
+        indices_segments.push_back(indices_triangles[next_index]);
+        indices_segments.push_back(right_vertex);
+        indices_segments.push_back(left_vertex);
+    }
+    segments_mesh.load_mesh(vertices, indices_segments);
 }
 
 std::string read_file(const std::string &filename)

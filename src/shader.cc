@@ -80,6 +80,8 @@ Shader::Shader(std::string vertex_shader_src,
         glGetProgramiv(shader_program_, GL_INFO_LOG_LENGTH, &log_size);
         program_log = (char *)std::malloc(
             log_size + 1); /* +1 pour le caractere de fin de chaine '\0' */
+        std::cerr << "ERROR: Impossible to link the shader program"
+                  << std::endl;
         if (program_log != 0)
         {
             glGetProgramInfoLog(shader_program_, log_size, &log_size,
@@ -215,6 +217,8 @@ Shader::Shader(std::string vertex_shader_src,
         glGetProgramiv(shader_program_, GL_INFO_LOG_LENGTH, &log_size);
         program_log = (char *)std::malloc(
             log_size + 1); /* +1 pour le caractere de fin de chaine '\0' */
+        std::cerr << "ERROR: Impossible to link the shader program"
+                  << std::endl;
         if (program_log != 0)
         {
             glGetProgramInfoLog(shader_program_, log_size, &log_size,
@@ -246,24 +250,24 @@ Shader::~Shader()
     glDeleteProgram(shader_program_);
 }
 
-void Shader::use()
+void Shader::use() const
 {
     glUseProgram(shader_program_);
 }
 
-void Shader::set_mat4_uniform(const char *name, glm::mat4 mat)
+void Shader::set_mat4_uniform(const char *name, glm::mat4 mat) const
 {
-    GLint location = glGetUniformLocation(shader_program_, name);
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+    GLint location = glGetUniformLocation(shader_program_, name);TEST_OPENGL_ERROR();
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));TEST_OPENGL_ERROR();
 }
 
-void Shader::set_float_uniform(const char *name, float x)
+void Shader::set_float_uniform(const char *name, float x) const
 {
     GLint location = glGetUniformLocation(shader_program_, name);
     glUniform1f(location, x);
 }
 
-void Shader::set_mat4_uniform(const char *name, btScalar *mat)
+void Shader::set_mat4_uniform(const char *name, btScalar *mat) const
 {
     float res[16];
     for (int i = 0; i < 16; i++)
@@ -274,29 +278,19 @@ void Shader::set_mat4_uniform(const char *name, btScalar *mat)
     glUniformMatrix4fv(location, 1, GL_FALSE, res);
 }
 
-void Shader::set_vec2_uniform(const char *name, glm::vec2 vec)
+void Shader::set_vec2_uniform(const char *name, glm::vec2 vec) const
 {
     GLint location = glGetUniformLocation(shader_program_, name);
     glUniform2fv(location, 1, glm::value_ptr(vec));
 }
 
-void Shader::set_vec3_uniform(const char *name, glm::vec3 vec)
+void Shader::set_vec3_uniform(const char *name, glm::vec3 vec) const
 {
     GLint location = glGetUniformLocation(shader_program_, name);
     glUniform3fv(location, 1, glm::value_ptr(vec));
 }
 
-void Shader::bind_texture(std::shared_ptr<Object> obj)
-{
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, obj->get_texture());
-    unsigned tex_location =
-        glGetUniformLocation(shader_program_, "texture_sampler");
-    glUniform1i(tex_location, 0);
-    TEST_OPENGL_ERROR();
-}
-
-void Shader::bind_texture_depth(GLuint depth_map)
+void Shader::bind_texture_depth(GLuint depth_map) const
 {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, depth_map);

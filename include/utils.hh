@@ -1,22 +1,9 @@
 #pragma once
 
-#include "glad/glad.h"
-
-#include <GLFW/glfw3.h>
-#include <btBulletDynamicsCommon.h>
-#include <fstream>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <map>
-#include <array>
-
+#include "includes.hh"
 #include "printf.hh"
+#include "mesh.hh"
+
 void test_opengl_error(std::string func, std::string file, int line);
 
 #define TEST_OPENGL_ERROR()                                                    \
@@ -25,9 +12,10 @@ void test_opengl_error(std::string func, std::string file, int line);
         test_opengl_error(__func__, __FILE__, __LINE__);                       \
     } while (0)
 
-void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
+void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segment_mesh);
+/*void load_obj(const char *filename, std::vector<glm::vec3> &vertices,
               std::vector<glm::vec2> &uvs, std::vector<glm::vec3> &normals, 
-              std::vector<unsigned int> &indices, std::vector<float> &vbo_data);
+              std::vector<unsigned int> &indices, std::vector<float> &vbo_data);*/
 
 std::string read_file(const std::string &filename);
 

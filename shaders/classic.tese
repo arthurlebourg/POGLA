@@ -5,18 +5,18 @@ layout(isolines, equal_spacing, ccw) in;
 
 in TCS_OUT {
     vec3 normal;
+    vec3 color;
     vec2 uv;
-    float segment_length;
 } tcs_out[];
 
 out TCE_OUT {
     vec3 normal;
+    vec3 color;
     vec2 uv;
 } tce_out;
 
 uniform float seed;
 uniform mat4 model_view_matrix;
-uniform mat4 projection_matrix;
 uniform float far = 300.0;
 
 float rand(vec2 co){
@@ -27,6 +27,9 @@ void main()
 {
     vec3 n = mix(tcs_out[0].normal, tcs_out[1].normal, gl_TessCoord.x);
     tce_out.normal = n;
+
+    vec3 c = mix(tcs_out[0].color, tcs_out[1].color, gl_TessCoord.x);
+    tce_out.color = c;
     
     vec2 uv = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
     tce_out.uv = uv;
