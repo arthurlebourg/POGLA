@@ -6,8 +6,8 @@ int main()
 
     Object sce("objects/casa_color.obj", "textures/white.tga", glm::vec3(0, -20, 0), 0.0);
     
-     Object plane("objects/plane.obj", "textures/white.tga", glm::vec3(0, -35, 0), 0.0);
-    //Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, 7, 5),0.0);
+    Object plane("objects/plane.obj", "textures/white.tga", glm::vec3(0, -35, 0), 0.0);
+    Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, -30, 5),0.0);
     
 
     auto scene = std::make_shared<Scene>(glm::vec3(0.0, 10.0, 0.0));
@@ -15,7 +15,7 @@ int main()
         std::make_shared<Player>(glm::vec3(0, 10, 0.0), glm::vec3(0, 0, 1));
     scene->add_player(player);
     scene->add_object(std::make_shared<Object>(plane));
-    //scene->add_object(std::make_shared<Object>(cube));
+    scene->add_object(std::make_shared<Object>(cube));
     scene->add_object(std::make_shared<Object>(sce));
     for (int i = 0; i < 2; i++)
     {

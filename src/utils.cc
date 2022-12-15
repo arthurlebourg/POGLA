@@ -70,14 +70,17 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
     std::vector<unsigned int> indices_triangles;
     std::vector<unsigned int> indices_segments;
 
-    std::map<Vertex, unsigned int> pushed_vertices;
-    std::set<std::pair<Vertex, Vertex>> pushed_edges;
+    //std::map<Vertex, unsigned int> pushed_vertices;
+    std::map<std::array<float, 11>, unsigned int> pushed_vertices;
+    
+    std::set<std::pair<unsigned int, unsigned int>> pushed_edges;
 
     auto& attrib = reader.GetAttrib();
     auto& shapes = reader.GetShapes();
     auto& materials = reader.GetMaterials();
 
-    std::map<std::pair<Vertex, Vertex>, size_t> half_edge_to_vertex_index;
+    //std::map<std::pair<unsigned int, unsigned int>, unsigned int> half_edge_to_vertex_index;
+    std::vector<std::array<unsigned int, 3>> faces;
     
     int counter_index = 0;
     // Loop over shapes
@@ -93,7 +96,7 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
                 std::cerr << "Error: face with " << fv << " vertices. please use triangulated faces" << std::endl;
                 exit(1);
             }
-            std::array<size_t, 3> face_vertices;
+            std::array<unsigned int, 3> face_vertices;
 
             // Optional: vertex colors
             tinyobj::real_t red = 1.0;
@@ -104,44 +107,10 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
             {
                 size_t mv = shapes[s].mesh.material_ids[f]; // https://fr.wikipedia.org/wiki/Material_Template_Library
                 auto mat = materials[mv];
-                //red = mat.ambient[0];
-                //green = mat.ambient[1];
-                //blue = mat.ambient[2];
                 red = mat.diffuse[0];
                 green = mat.diffuse[1];
                 blue = mat.diffuse[2];
                 
-                /*std::cout << std::endl << "material " << mv << " " << mat.name
-                << std::endl; std::cout << "ambient " << mat.ambient[0] << " "
-                << mat.ambient[1] << " " << mat.ambient[2] << std::endl;
-                std::cout << "diffuse " << mat.diffuse[0] << " " <<
-                mat.diffuse[1] << " " << mat.diffuse[2] << std::endl; std::cout
-                << "specular " << mat.specular[0] << " " << mat.specular[1] << "
-                " << mat.specular[2] << std::endl; std::cout << "transmittance "
-                << mat.transmittance[0] << " " << mat.transmittance[1] << " " <<
-                mat.transmittance[2] << std::endl; std::cout << "emission " <<
-                mat.emission[0] << " " << mat.emission[1] << " " <<
-                mat.emission[2] << std::endl; std::cout << "shininess " <<
-                mat.shininess << std::endl; std::cout << "ior " << mat.ior <<
-                std::endl; std::cout << "dissolve " << mat.dissolve <<
-                std::endl; std::cout << "illum " << mat.illum << std::endl;
-                std::cout << "ambient_texname " << mat.ambient_texname <<
-                std::endl; std::cout << "diffuse_texname " <<
-                mat.diffuse_texname << std::endl; std::cout << "specular_texname
-                " << mat.specular_texname << std::endl; std::cout <<
-                "specular_highlight_texname " << mat.specular_highlight_texname
-                << std::endl; std::cout << "bump_texname " << mat.bump_texname
-                << std::endl; std::cout << "displacement_texname " <<
-                mat.displacement_texname << std::endl; std::cout <<
-                "alpha_texname " << mat.alpha_texname << std::endl; std::cout <<
-                "roughness_texname " << mat.roughness_texname << std::endl;
-                std::cout << "metallic_texname " << mat.metallic_texname <<
-                std::endl; std::cout << "sheen_texname " << mat.sheen_texname <<
-                std::endl; std::cout << "emissive_texname " <<
-                mat.emissive_texname << std::endl; std::cout << "normal_texname
-                " << mat.normal_texname << std::endl; std::cout <<
-                "unknown_parameter " << mat.unknown_parameter.size() <<
-                std::endl;*/
             }
             // Loop over vertices in the face.
             for (size_t v = 0; v < fv; v++)
@@ -184,34 +153,30 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
                         attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
                 }
 
-                /*if (attrib.colors.size() > 0)
+                Vertex vertex = {glm::vec3(vx, vy, vz), glm::vec3(nx, ny, nz),
+                                 glm::vec2(tx, ty), glm::vec3(red, green, blue)};
+                //Vertex vertex(glm::vec3(vx, vy, vz), glm::vec3(nx, ny, nz), glm::vec3(red, green, blue), glm::vec2(tx, ty));
+                if (pushed_vertices.find({vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}) != pushed_vertices.end())
                 {
-                    red =
-                        attrib.colors[3 * size_t(idx.vertex_index) + 0];
-                    green =
-                        attrib.colors[3 * size_t(idx.vertex_index) + 1];
-                    blue =
-                        attrib.colors[3 * size_t(idx.vertex_index) + 2];
-                }*/
-                
-                Vertex vertex(glm::vec3(vx, vy, vz), glm::vec3(nx, ny, nz), glm::vec3(red, green, blue), glm::vec2(tx, ty));
-                if (pushed_vertices.find(vertex) != pushed_vertices.end())
-                {
-                    indices_triangles.push_back(pushed_vertices[vertex]);
-                    face_vertices[v] = pushed_vertices[vertex];
+                    indices_triangles.push_back(pushed_vertices[{vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}]);
+                    face_vertices[v] = pushed_vertices[{vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}];
                 }
                 else
                 {
                     vertices.push_back(vertex);
                     indices_triangles.push_back(counter_index);
                     face_vertices[v] = counter_index;
-                    pushed_vertices[vertex] = counter_index++;
+                    pushed_vertices[{vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}] = counter_index++;
                 }
             }
             index_offset += fv;
-            half_edge_to_vertex_index[std::make_pair(vertices[face_vertices[0]], vertices[face_vertices[1]])] = face_vertices[2];
-            half_edge_to_vertex_index[std::make_pair(vertices[face_vertices[1]], vertices[face_vertices[2]])] = face_vertices[0];
-            half_edge_to_vertex_index[std::make_pair(vertices[face_vertices[2]], vertices[face_vertices[0]])] = face_vertices[1];
+            faces.push_back(face_vertices);
+            /*half_edge_to_vertex_index[std::make_pair(face_vertices[0], face_vertices[1])] = face_vertices[2];
+            half_edge_to_vertex_index[std::make_pair(face_vertices[1], face_vertices[2])] = face_vertices[0];
+            half_edge_to_vertex_index[std::make_pair(face_vertices[2], face_vertices[0])] = face_vertices[1];*/
+
+            //std::cout << "face " << f << " : " << face_vertices[0] << "(" << vertices[face_vertices[0]].position.x << ", " << vertices[face_vertices[0]].position.y << ", " << vertices[face_vertices[0]].position.z << ") " << face_vertices[1] << "(" << vertices[face_vertices[1]].position.x << ", " << vertices[face_vertices[1]].position.y << ", " << vertices[face_vertices[1]].position.z << ") " << face_vertices[2] << "(" << vertices[face_vertices[2]].position.x << ", " << vertices[face_vertices[2]].position.y << ", " << vertices[face_vertices[2]].position.z << ") " << std::endl;
+
 
         }
     }
@@ -221,8 +186,8 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
     for (size_t i = 0; i < indices_triangles.size(); i++)
     {
         size_t next_index = i % 3 == 2 ? i - 2 : i + 1;
-        Vertex v1 = vertices[indices_triangles[i]];
-        Vertex v2 = vertices[indices_triangles[next_index]];
+        unsigned int v1 = indices_triangles[i];
+        unsigned int v2 = indices_triangles[next_index];
         if (pushed_edges.find(std::make_pair(v1, v2)) != pushed_edges.end())
         {
             continue;
@@ -230,17 +195,64 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
         pushed_edges.insert(std::make_pair(v1, v2));
         pushed_edges.insert(std::make_pair(v2, v1));
 
-        std::pair<Vertex, Vertex> left_edge =
+        /*std::pair<unsigned int, unsigned int> left_edge =
             std::make_pair(v2, v1); // left is the adjacent vertex
 
-        std::pair<Vertex, Vertex> right_edge =
+        std::pair<unsigned int, unsigned int> right_edge =
             std::make_pair(v1, v2);
 
+        if (half_edge_to_vertex_index.find(left_edge) ==
+            half_edge_to_vertex_index.end())
+        {
+            std::cout << "left edge not found" << std::endl;
+        }
+        if (half_edge_to_vertex_index.find(right_edge) ==
+            half_edge_to_vertex_index.end())
+        {
+            std::cout << "right edge not found" << std::endl;
+        }
         size_t left_vertex = half_edge_to_vertex_index[left_edge];
-        size_t right_vertex = half_edge_to_vertex_index[right_edge];
+        size_t right_vertex = half_edge_to_vertex_index[right_edge];*/
 
-        indices_segments.push_back(indices_triangles[i]);
-        indices_segments.push_back(indices_triangles[next_index]);
+        //find adjacent vertex in faces
+        size_t left_vertex = 0;
+        size_t right_vertex = 0;
+        for (size_t f = 0; f < faces.size(); f++)
+        {
+            if (faces[f][0] == v1 && faces[f][1] == v2)
+            {
+                left_vertex = faces[f][2];
+            }
+            else if (faces[f][1] == v1 && faces[f][2] == v2)
+            {
+                left_vertex = faces[f][0];
+            }
+            else if (faces[f][2] == v1 && faces[f][0] == v2)
+            {
+                left_vertex = faces[f][1];
+            }
+            else if (faces[f][0] == v2 && faces[f][1] == v1)
+            {
+                right_vertex = faces[f][2];
+            }
+            else if (faces[f][1] == v2 && faces[f][2] == v1)
+            {
+                right_vertex = faces[f][0];
+            }
+            else if (faces[f][2] == v2 && faces[f][0] == v1)
+            {
+                right_vertex = faces[f][1];
+            }
+        }
+
+        /*std::cout << "v1: " << v1 << std::endl;
+        std::cout << "v2: " << v2 << std::endl;
+        std::cout << "left vertex: " << left_vertex << std::endl;
+        std::cout << "right vertex: " << right_vertex << std::endl << std::endl;*/
+
+
+        indices_segments.push_back(v1);
+        indices_segments.push_back(v2);
         indices_segments.push_back(right_vertex);
         indices_segments.push_back(left_vertex);
     }

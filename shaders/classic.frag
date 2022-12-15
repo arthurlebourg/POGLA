@@ -19,11 +19,12 @@ float LinearizeDepth(float depth)
     float z = depth * 2.0 - 1.0; // back to NDC 
     return (2.0 * near * far) / (far + near - z * (far - near));	
 }
+
 void main()
 {
     float shader_depth = LinearizeDepth(gl_FragCoord.z) / far;
-    float texture_depth = texture(depth_sampler, gl_FragCoord.xy /viewSize).r;
-    if (shader_depth - 0.01> texture_depth)
+    float texture_depth = texture(depth_sampler, gl_FragCoord.xy / viewSize).r;
+    if (shader_depth > texture_depth * 1.01)
     {
         //output_color = vec4(0.0, 1.0, 0.0, 0.0);
         discard;

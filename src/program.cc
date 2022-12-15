@@ -287,9 +287,18 @@ void Program::render(glm::mat4 const &model_view_matrix,
     glDepthFunc(GL_LESS); 
     TEST_OPENGL_ERROR();
     render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
+    glLineWidth(5.0f);
     for (auto obj : scene_->get_objs())
     {
+        // create a buffer to hold the printf results
+		GLuint printBuffer = createPrintBuffer();
+		// bind it to the current program
+		bindPrintBuffer(render_shader_.shader_program_, printBuffer);
         obj->draw_segments(render_shader_);
+        // convert to string, output to console
+		//printf("\n\nGLSL print:\n%s\n", getPrintBufferString(printBuffer).c_str());
+		// clean up
+		deletePrintBuffer(printBuffer);
     }
 
     glfwSwapBuffers(window_);

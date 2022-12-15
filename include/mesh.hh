@@ -33,15 +33,15 @@ public:
         glEnableVertexAttribArray(0);
         // normal attribute
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (void *)offsetof(Vertex, normal_));
+                              (void *)offsetof(Vertex, normal));
         glEnableVertexAttribArray(1);
-        // color attribute
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (void *)offsetof(Vertex, color_));
+        // texture coord attribute
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              (void *)offsetof(Vertex, uv));
         glEnableVertexAttribArray(2);
-        // uv attribute
-        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (void *)offsetof(Vertex, uv_));
+        // color attribute
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                              (void *)offsetof(Vertex, color));
         glEnableVertexAttribArray(3);
 
         glBindVertexArray(0);

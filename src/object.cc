@@ -94,7 +94,7 @@ Object::Object(const std::string obj_file, const std::string texture,
     //std::cout << "Vertices: " << mesh_.get_vertices().size() << std::endl;
     for (auto v : mesh_triangles_.get_vertices())
     {
-        auto i = v.pos_;
+        auto i = v.position;
         shape->addPoint(btVector3(i.x, i.y, i.z));
     }
     shape->optimizeConvexHull();
