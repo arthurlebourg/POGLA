@@ -80,7 +80,7 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
     auto& materials = reader.GetMaterials();
 
     //std::map<std::pair<unsigned int, unsigned int>, unsigned int> half_edge_to_vertex_index;
-    std::vector<std::array<unsigned int, 3>> faces;
+    std::vector<std::array<std::pair<Vertex, size_t>, 3>> faces;
     
     int counter_index = 0;
     // Loop over shapes
@@ -96,7 +96,7 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
                 std::cerr << "Error: face with " << fv << " vertices. please use triangulated faces" << std::endl;
                 exit(1);
             }
-            std::array<unsigned int, 3> face_vertices;
+            std::array<std::pair<Vertex, size_t>, 3> face_vertices;
 
             // Optional: vertex colors
             tinyobj::real_t red = 1.0;
@@ -159,13 +159,13 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
                 if (pushed_vertices.find({vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}) != pushed_vertices.end())
                 {
                     indices_triangles.push_back(pushed_vertices[{vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}]);
-                    face_vertices[v] = pushed_vertices[{vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}];
+                    face_vertices[v] = {vertex, pushed_vertices[{vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}]};
                 }
                 else
                 {
                     vertices.push_back(vertex);
                     indices_triangles.push_back(counter_index);
-                    face_vertices[v] = counter_index;
+                    face_vertices[v] = {vertex, counter_index};
                     pushed_vertices[{vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue}] = counter_index++;
                 }
             }
@@ -182,6 +182,10 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
     }
 
     triangle_mesh.load_mesh(vertices, indices_triangles);
+        for (size_t f = 0; f < faces.size(); f++)
+        {
+            //std::cout << "face: " << f << " / " << faces[f][0].position << " " << faces[f][1] << " " << faces[f][2] << std::endl;
+        }
     
     for (size_t i = 0; i < indices_triangles.size(); i++)
     {
@@ -194,6 +198,9 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
         }
         pushed_edges.insert(std::make_pair(v1, v2));
         pushed_edges.insert(std::make_pair(v2, v1));
+
+        Vertex vertex1 = vertices[v1];
+        Vertex vertex2 = vertices[v2];
 
         /*std::pair<unsigned int, unsigned int> left_edge =
             std::make_pair(v2, v1); // left is the adjacent vertex
@@ -215,34 +222,46 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
         size_t right_vertex = half_edge_to_vertex_index[right_edge];*/
 
         //find adjacent vertex in faces
-        size_t left_vertex = 0;
-        size_t right_vertex = 0;
+        size_t left_vertex = -1;
+        size_t right_vertex = -1;
         for (size_t f = 0; f < faces.size(); f++)
         {
-            if (faces[f][0] == v1 && faces[f][1] == v2)
+            //std::cout << "face: " << f << " " << faces[f][0] << " " << faces[f][1] << " " << faces[f][2] << std::endl;
+            if (faces[f][0].first.position.x == vertex1.position.x && faces[f][0].first.position.y == vertex1.position.y && faces[f][0].first.position.z == vertex1.position.z && 
+                faces[f][1].first.position.x == vertex2.position.x && faces[f][1].first.position.y == vertex2.position.y && faces[f][1].first.position.z == vertex2.position.z)
             {
-                left_vertex = faces[f][2];
+                left_vertex = faces[f][2].second;
             }
-            else if (faces[f][1] == v1 && faces[f][2] == v2)
+            else if (faces[f][1].first.position.x == vertex1.position.x && faces[f][1].first.position.y == vertex1.position.y && faces[f][1].first.position.z == vertex1.position.z && 
+                faces[f][2].first.position.x == vertex2.position.x && faces[f][2].first.position.y == vertex2.position.y && faces[f][2].first.position.z == vertex2.position.z)
             {
-                left_vertex = faces[f][0];
+                left_vertex = faces[f][0].second;
             }
-            else if (faces[f][2] == v1 && faces[f][0] == v2)
+            else if (faces[f][2].first.position.x == vertex1.position.x && faces[f][2].first.position.y == vertex1.position.y && faces[f][2].first.position.z == vertex1.position.z && 
+                faces[f][0].first.position.x == vertex2.position.x && faces[f][0].first.position.y == vertex2.position.y && faces[f][0].first.position.z == vertex2.position.z)
             {
-                left_vertex = faces[f][1];
+                left_vertex = faces[f][1].second;
             }
-            else if (faces[f][0] == v2 && faces[f][1] == v1)
+            if (faces[f][0].first.position.x == vertex2.position.x && faces[f][0].first.position.y == vertex2.position.y && faces[f][0].first.position.z == vertex2.position.z && 
+                faces[f][1].first.position.x == vertex1.position.x && faces[f][1].first.position.y == vertex1.position.y && faces[f][1].first.position.z == vertex1.position.z)
             {
-                right_vertex = faces[f][2];
+                right_vertex = faces[f][2].second;
             }
-            else if (faces[f][1] == v2 && faces[f][2] == v1)
+            else if (faces[f][1].first.position.x == vertex2.position.x && faces[f][1].first.position.y == vertex2.position.y && faces[f][1].first.position.z == vertex2.position.z && 
+                faces[f][2].first.position.x == vertex1.position.x && faces[f][2].first.position.y == vertex1.position.y && faces[f][2].first.position.z == vertex1.position.z)
             {
-                right_vertex = faces[f][0];
+                right_vertex = faces[f][0].second;
             }
-            else if (faces[f][2] == v2 && faces[f][0] == v1)
+            else if (faces[f][2].first.position.x == vertex2.position.x && faces[f][2].first.position.y == vertex2.position.y && faces[f][2].first.position.z == vertex2.position.z && 
+                faces[f][0].first.position.x == vertex1.position.x && faces[f][0].first.position.y == vertex1.position.y && faces[f][0].first.position.z == vertex1.position.z)
             {
-                right_vertex = faces[f][1];
+                right_vertex = faces[f][1].second;
             }
+        }
+
+        if (left_vertex == (size_t)-1 || right_vertex == (size_t)-1)
+        {
+            std::cout << "sus" << std::endl;
         }
 
         /*std::cout << "v1: " << v1 << std::endl;
@@ -253,8 +272,8 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
 
         indices_segments.push_back(v1);
         indices_segments.push_back(v2);
-        indices_segments.push_back(right_vertex);
         indices_segments.push_back(left_vertex);
+        indices_segments.push_back(right_vertex);
     }
     segments_mesh.load_mesh(vertices, indices_segments);
 }

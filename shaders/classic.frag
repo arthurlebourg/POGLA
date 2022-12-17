@@ -24,7 +24,11 @@ void main()
 {
     float shader_depth = LinearizeDepth(gl_FragCoord.z) / far;
     float texture_depth = texture(depth_sampler, gl_FragCoord.xy / viewSize).r;
-    if (shader_depth > texture_depth * 1.01)
+
+    //enablePrintf();
+    printf("shader_depth: %f  texture_depth: %f\n", shader_depth, texture_depth);
+
+    if (shader_depth >= texture_depth)
     {
         //output_color = vec4(0.0, 1.0, 0.0, 0.0);
         discard;
