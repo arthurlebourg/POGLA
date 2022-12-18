@@ -7,8 +7,6 @@ in TCE_OUT {
     vec3 normal;
     vec3 color;
     vec2 uv;
-    vec3 p1;
-    vec3 p2;
 } tce_out[];
 
 out GS_OUT {
@@ -35,28 +33,8 @@ void main()
     EmitVertex();
     EndPrimitive();
     
-    /*gl_Position = projection_matrix * model_view_matrix * (gl_in[0].gl_Position + gl_in[1].gl_Position) / 2.0;
-    gs_out.color = vec3(0.0, 0.0, 0.0);
-    gs_out.uv = tce_out[0].uv;
-    EmitVertex();
-
-    gl_Position = projection_matrix * model_view_matrix * vec4(tce_out[0].p1, 1.0);
-    gs_out.color = vec3(1.0, 1.0, 0.0);
-    gs_out.uv = tce_out[1].uv;
-    EmitVertex();
-    EndPrimitive();
-    
-    gl_Position = projection_matrix * model_view_matrix * ((gl_in[0].gl_Position + gl_in[1].gl_Position) / 2.0);
-    gs_out.color = vec3(0.0, 0.0, 0.0);
-    gs_out.uv = tce_out[0].uv;
-    EmitVertex();
-
-    gl_Position = projection_matrix * model_view_matrix * vec4(tce_out[0].p2 , 1.0);
-    gs_out.color = vec3(1.0, 0.0, 1.0);
-    gs_out.uv = tce_out[1].uv;
-    EmitVertex();
-    EndPrimitive();*/
     return;
+    /*
     
     vec3 ndcSpace1 = clipSpace1.xyz / clipSpace1.w;
     vec3 ndcSpace2 = clipSpace2.xyz / clipSpace2.w;
@@ -110,4 +88,5 @@ void main()
     EmitVertex();
     
     EndPrimitive();
+    */
 }

@@ -28,9 +28,10 @@ void main()
     //enablePrintf();
     printf("shader_depth: %f  texture_depth: %f\n", shader_depth, texture_depth);
 
-    if (shader_depth >= texture_depth)
+    if (shader_depth > texture_depth * 1.01)
     {
         //output_color = vec4(0.0, 1.0, 0.0, 0.0);
+        //return;
         discard;
     }
     output_color = vec4(gs_out.color, 1.0) * texture(texture_sampler, gs_out.uv);

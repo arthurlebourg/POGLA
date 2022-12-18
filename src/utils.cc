@@ -222,46 +222,58 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
         size_t right_vertex = half_edge_to_vertex_index[right_edge];*/
 
         //find adjacent vertex in faces
-        size_t left_vertex = -1;
-        size_t right_vertex = -1;
+        size_t left_vertex = 0;
+        size_t right_vertex = 0;
+        bool found_left = false;
+        bool found_right = false;
         for (size_t f = 0; f < faces.size(); f++)
         {
+            if (found_left && found_right)
+            {
+                break;
+            }
             //std::cout << "face: " << f << " " << faces[f][0] << " " << faces[f][1] << " " << faces[f][2] << std::endl;
-            if (faces[f][0].first.position.x == vertex1.position.x && faces[f][0].first.position.y == vertex1.position.y && faces[f][0].first.position.z == vertex1.position.z && 
+            if (!found_left && faces[f][0].first.position.x == vertex1.position.x && faces[f][0].first.position.y == vertex1.position.y && faces[f][0].first.position.z == vertex1.position.z && 
                 faces[f][1].first.position.x == vertex2.position.x && faces[f][1].first.position.y == vertex2.position.y && faces[f][1].first.position.z == vertex2.position.z)
             {
                 left_vertex = faces[f][2].second;
+                found_left = true;
             }
-            else if (faces[f][1].first.position.x == vertex1.position.x && faces[f][1].first.position.y == vertex1.position.y && faces[f][1].first.position.z == vertex1.position.z && 
+            else if (!found_left && faces[f][1].first.position.x == vertex1.position.x && faces[f][1].first.position.y == vertex1.position.y && faces[f][1].first.position.z == vertex1.position.z && 
                 faces[f][2].first.position.x == vertex2.position.x && faces[f][2].first.position.y == vertex2.position.y && faces[f][2].first.position.z == vertex2.position.z)
             {
                 left_vertex = faces[f][0].second;
+                found_left = true;
             }
-            else if (faces[f][2].first.position.x == vertex1.position.x && faces[f][2].first.position.y == vertex1.position.y && faces[f][2].first.position.z == vertex1.position.z && 
+            else if (!found_left && faces[f][2].first.position.x == vertex1.position.x && faces[f][2].first.position.y == vertex1.position.y && faces[f][2].first.position.z == vertex1.position.z && 
                 faces[f][0].first.position.x == vertex2.position.x && faces[f][0].first.position.y == vertex2.position.y && faces[f][0].first.position.z == vertex2.position.z)
             {
                 left_vertex = faces[f][1].second;
+                found_left = true;
             }
-            if (faces[f][0].first.position.x == vertex2.position.x && faces[f][0].first.position.y == vertex2.position.y && faces[f][0].first.position.z == vertex2.position.z && 
+            if (!found_right && faces[f][0].first.position.x == vertex2.position.x && faces[f][0].first.position.y == vertex2.position.y && faces[f][0].first.position.z == vertex2.position.z && 
                 faces[f][1].first.position.x == vertex1.position.x && faces[f][1].first.position.y == vertex1.position.y && faces[f][1].first.position.z == vertex1.position.z)
             {
                 right_vertex = faces[f][2].second;
+                found_right = true;
             }
-            else if (faces[f][1].first.position.x == vertex2.position.x && faces[f][1].first.position.y == vertex2.position.y && faces[f][1].first.position.z == vertex2.position.z && 
+            else if (!found_right && faces[f][1].first.position.x == vertex2.position.x && faces[f][1].first.position.y == vertex2.position.y && faces[f][1].first.position.z == vertex2.position.z && 
                 faces[f][2].first.position.x == vertex1.position.x && faces[f][2].first.position.y == vertex1.position.y && faces[f][2].first.position.z == vertex1.position.z)
             {
                 right_vertex = faces[f][0].second;
+                found_right = true;
             }
-            else if (faces[f][2].first.position.x == vertex2.position.x && faces[f][2].first.position.y == vertex2.position.y && faces[f][2].first.position.z == vertex2.position.z && 
+            else if (!found_right && faces[f][2].first.position.x == vertex2.position.x && faces[f][2].first.position.y == vertex2.position.y && faces[f][2].first.position.z == vertex2.position.z && 
                 faces[f][0].first.position.x == vertex1.position.x && faces[f][0].first.position.y == vertex1.position.y && faces[f][0].first.position.z == vertex1.position.z)
             {
                 right_vertex = faces[f][1].second;
+                found_right = true;
             }
         }
 
-        if (left_vertex == (size_t)-1 || right_vertex == (size_t)-1)
+        if (!found_left || !found_right)
         {
-            std::cout << "sus" << std::endl;
+            //std::cout << "sus" << std::endl;
         }
 
         /*std::cout << "v1: " << v1 << std::endl;
