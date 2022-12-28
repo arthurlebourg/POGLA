@@ -4,7 +4,7 @@ int main()
 {
     GLFWwindow *window = init_window();
 
-    Object sce("objects/casa_color.obj", "textures/white.tga", glm::vec3(0, -20, 0), 0.0);
+    //Object sce("objects/casa_color.obj", "textures/white.tga", glm::vec3(0, -20, 0), 0.0);
     
     Object plane("objects/plane.obj", "textures/white.tga", glm::vec3(0, -35, 0), 0.0);
     Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, -30, 5),0.0);
@@ -16,7 +16,7 @@ int main()
     scene->add_player(player);
     scene->add_object(std::make_shared<Object>(plane));
     scene->add_object(std::make_shared<Object>(cube));
-    scene->add_object(std::make_shared<Object>(sce));
+    //scene->add_object(std::make_shared<Object>(sce));
     for (int i = 0; i < 2; i++)
     {
         Object amogus("objects/amongus.obj", "textures/pierre_sang.tga",

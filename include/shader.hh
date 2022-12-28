@@ -25,6 +25,7 @@ public:
 
     //void bind_texture(std::shared_ptr<Object> obj);
     void bind_texture_depth(GLuint depth_map) const;
+    void bind_texture_lines(GLuint lines_map) const;
 
     unsigned int shader_program_;
 private:

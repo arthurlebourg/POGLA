@@ -129,17 +129,22 @@ std::shared_ptr<Scene> Program::get_scene()
 void Program::update_depth_texture()
 {
     glDeleteTextures(1, &depth_map_);
-    GLint m_viewport[4];
+    glDeleteFramebuffers(1, &depth_map_fbo_);
+    glDeleteTextures(1, &lines_map_);
+    glDeleteFramebuffers(1, &lines_map_fbo_);
+    TEST_OPENGL_ERROR();
 
+    GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     TEST_OPENGL_ERROR();
     
     glGenFramebuffers(1, &depth_map_fbo_);TEST_OPENGL_ERROR();
+
     glBindFramebuffer(GL_FRAMEBUFFER, depth_map_fbo_);TEST_OPENGL_ERROR();
     glGenTextures(1, &depth_map_);TEST_OPENGL_ERROR();
 
     glBindTexture(GL_TEXTURE_2D, depth_map_);TEST_OPENGL_ERROR();
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_viewport[2], m_viewport[3], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_viewport[2], m_viewport[3], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depth_map_, 0);
@@ -147,8 +152,30 @@ void Program::update_depth_texture()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
                            depth_map_, 0);
     
+    unsigned int rbo_depth;
+    glGenRenderbuffers(1, &rbo_depth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo_depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_viewport[2], m_viewport[3]); // use a single renderbuffer object for both a depth AND stencil buffer.
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo_depth); // now actually attach it
+    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    TEST_OPENGL_ERROR();
 
-    std::cout << "width " << m_viewport[2] << " height " << m_viewport[3] << std::endl;
+    glGenFramebuffers(1, &lines_map_fbo_);TEST_OPENGL_ERROR();
+    glBindFramebuffer(GL_FRAMEBUFFER, lines_map_fbo_);TEST_OPENGL_ERROR();
+    glGenTextures(1, &lines_map_);TEST_OPENGL_ERROR();
+
+    glBindTexture(GL_TEXTURE_2D, lines_map_);TEST_OPENGL_ERROR();
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_viewport[2], m_viewport[3], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lines_map_, 0);
+    // attach depth texture as FBO's depth buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+                           lines_map_, 0);
+    
     unsigned int rbo;
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -200,20 +227,45 @@ Program::Program(GLFWwindow *window,
         std::shared_ptr<Scene> scene)
         : scene_(scene)
         , window_(window)
-        , render_shader_(Shader("shaders/classic.vert", "shaders/classic.tesc",
+        , lines_shader_(Shader("shaders/classic.vert", "shaders/classic.tesc",
                                 "shaders/classic.tese", "shaders/classic.geom",
                                 "shaders/classic.frag"))
         , depth_shader_(Shader("shaders/depth.vert", "shaders/depth.tesc",
                                "shaders/depth.tese", "shaders/depth.geom",
                                "shaders/depth.frag"))
+        , quad_shader_(Shader("shaders/quad.vert", "shaders/quad.frag"))
 {
-    render_shader_.use();TEST_OPENGL_ERROR();
+    lines_shader_.use();TEST_OPENGL_ERROR();
     depth_shader_.use();
 
     glfwSetCursorPosCallback(window, mouse_motion_callback);
     glfwSetKeyCallback(window, keyboard_callback);
 
     update_depth_texture();
+
+    // create quad for rendering depth texture
+    // ---------------------------------------
+
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    // screen quad VAO
+    glGenVertexArrays(1, &quadVAO_);
+    glGenBuffers(1, &quadVBO_);
+    glBindVertexArray(quadVAO_);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO_);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 }
 
 Program::~Program()
@@ -229,10 +281,10 @@ GLFWwindow *Program::get_window()
 void Program::render(glm::mat4 const &model_view_matrix,
                      glm::mat4 const &projection_matrix, float deltaTime)
 {
-    render_shader_.use();TEST_OPENGL_ERROR();
-    //render_shader_.set_vec3_uniform("light_pos", scene_->get_light());
-    render_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
-    render_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
+    lines_shader_.use();TEST_OPENGL_ERROR();
+    //lines_shader_.set_vec3_uniform("light_pos", scene_->get_light());
+    lines_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
+    lines_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
     depth_shader_.use();TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
@@ -241,8 +293,8 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     
-    render_shader_.use();TEST_OPENGL_ERROR();
-    render_shader_.set_vec2_uniform("viewSize", glm::vec2(m_viewport[2], m_viewport[3]));
+    lines_shader_.use();TEST_OPENGL_ERROR();
+    lines_shader_.set_vec2_uniform("viewSize", glm::vec2(m_viewport[2], m_viewport[3]));
     TEST_OPENGL_ERROR();
 
 
@@ -251,8 +303,8 @@ void Program::render(glm::mat4 const &model_view_matrix,
         time_to_update_seed_ = 1.0 / nb_of_updates_per_seconds_;
         float seed = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-        render_shader_.use();TEST_OPENGL_ERROR();
-        render_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
+        lines_shader_.use();TEST_OPENGL_ERROR();
+        lines_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
         
         depth_shader_.use();TEST_OPENGL_ERROR();
         depth_shader_.set_float_uniform("seed", seed);TEST_OPENGL_ERROR();
@@ -274,32 +326,50 @@ void Program::render(glm::mat4 const &model_view_matrix,
     {
         obj->draw_triangles(depth_shader_);
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-    // real render
-    render_shader_.use();TEST_OPENGL_ERROR();
-    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    // lines render
+    lines_shader_.use();TEST_OPENGL_ERROR();
+    glBindFramebuffer(GL_FRAMEBUFFER, lines_map_fbo_);
+    //glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
     glClear(
         GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     TEST_OPENGL_ERROR();
     glDepthFunc(GL_LESS); 
     TEST_OPENGL_ERROR();
-    render_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
+    //lines_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
     glLineWidth(5.0f);
     for (auto obj : scene_->get_objs())
     {
         // create a buffer to hold the printf results
-		GLuint printBuffer = createPrintBuffer();
+		//GLuint printBuffer = createPrintBuffer();
 		// bind it to the current program
-		bindPrintBuffer(render_shader_.shader_program_, printBuffer);
-        obj->draw_segments(render_shader_);
+		//bindPrintBuffer(lines_shader_.shader_program_, printBuffer);
+        obj->draw_segments(lines_shader_);
         // convert to string, output to console
 		//printf("\n\nGLSL print:\n%s\n", getPrintBufferString(printBuffer).c_str());
 		// clean up
-		deletePrintBuffer(printBuffer);
+		//deletePrintBuffer(printBuffer);
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // render
+    quad_shader_.use();TEST_OPENGL_ERROR();
+    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    TEST_OPENGL_ERROR();
+    glDepthFunc(GL_LESS);
+    TEST_OPENGL_ERROR();
+    quad_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
+    quad_shader_.bind_texture_lines(lines_map_);TEST_OPENGL_ERROR();
+    glBindVertexArray(quadVAO_);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    TEST_OPENGL_ERROR();
+
 
     glfwSwapBuffers(window_);
     glfwPollEvents();

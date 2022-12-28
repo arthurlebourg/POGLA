@@ -292,10 +292,20 @@ void Shader::set_vec3_uniform(const char *name, glm::vec3 vec) const
 
 void Shader::bind_texture_depth(GLuint depth_map) const
 {
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depth_map);
     unsigned tex_location =
         glGetUniformLocation(shader_program_, "depth_sampler");
+    glUniform1i(tex_location, 0);
+    TEST_OPENGL_ERROR();
+}
+
+void Shader::bind_texture_lines(GLuint lines_map) const
+{
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, lines_map);
+    unsigned tex_location =
+        glGetUniformLocation(shader_program_, "lines_sampler");
     glUniform1i(tex_location, 1);
     TEST_OPENGL_ERROR();
 }

@@ -35,12 +35,18 @@ private:
 
     GLFWwindow *window_;
 
-    Shader render_shader_;
+    Shader lines_shader_;
     Shader depth_shader_;
+    Shader quad_shader_;
 
     GLuint depth_map_;
     GLuint depth_map_fbo_;
+    
+    GLuint lines_map_;
+    GLuint lines_map_fbo_;
 
+    GLuint quadVAO_, quadVBO_;
+    
     float nb_of_updates_per_seconds_ = 12.0f; // 24 updates per seconds or 12 updates per seconds (stop motion standard)
     float time_to_update_seed_ = 1.0 / nb_of_updates_per_seconds_;
 };
