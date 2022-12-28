@@ -357,7 +357,8 @@ void Program::render(glm::mat4 const &model_view_matrix,
 
     // render
     quad_shader_.use();TEST_OPENGL_ERROR();
-    glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    //glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     TEST_OPENGL_ERROR();
