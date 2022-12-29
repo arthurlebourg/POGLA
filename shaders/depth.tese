@@ -8,6 +8,12 @@ in TCS_OUT {
     vec2 uv;
 } tcs_out[];
 
+out TES_OUT {
+    vec3 normal;
+    vec3 color;
+    vec2 uv;
+} tes_out;
+
 uniform float seed;
 uniform mat4 model_view_matrix;
 uniform mat4 projection_matrix;
@@ -34,6 +40,10 @@ void main()
     vec2 uv1 = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
     vec2 uv2 = mix(tcs_out[2].uv, tcs_out[3].uv, gl_TessCoord.x);
     vec2 uv = mix(uv1, uv2, gl_TessCoord.y);
+    
+    tes_out.normal = n;
+    tes_out.color = c;
+    tes_out.uv = uv;
 
     /*vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     float dist = distance(cam_pos, p.xyz);

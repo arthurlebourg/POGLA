@@ -23,5 +23,6 @@ float LinearizeDepth(float depth)
 void main()
 {
     float shader_depth = LinearizeDepth(gl_FragCoord.z) / far;
-    output_color = vec4(gs_out.color, shader_depth) * texture(texture_sampler, gs_out.uv);
+    // output_color = vec4(gs_out.color, shader_depth) * texture(texture_sampler, gs_out.uv);
+    output_color = vec4(0.0, 0.0, 0.0, shader_depth);
 }
