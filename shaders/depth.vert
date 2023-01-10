@@ -8,6 +8,7 @@ in vec3 color;
 //in float is_double_segment;
 
 out VS_OUT {
+    vec3 position;
     vec3 normal;
     vec3 color;
     vec2 uv;
@@ -20,6 +21,7 @@ uniform mat4 transform;
 void main()
 {
     gl_Position = transform * vec4(position, 1.0);
+    vs_out.position = position;
     vs_out.normal = normal;
     vs_out.color = color;
     vs_out.uv = uv;

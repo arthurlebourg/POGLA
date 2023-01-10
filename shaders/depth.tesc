@@ -3,6 +3,7 @@
 layout(vertices = 3) out;
  
 in VS_OUT {
+    vec3 position;
     vec3 normal;
     vec3 color;
     vec2 uv;
@@ -14,6 +15,7 @@ uniform mat4 model_view_matrix;
 uniform mat4 projection_matrix;
 
 out TCS_OUT {
+    vec3 position;
     vec3 normal;
     vec3 color;
     vec2 uv;
@@ -22,6 +24,7 @@ out TCS_OUT {
 void main()
 {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    tcs_out[gl_InvocationID].position = vs_out[gl_InvocationID].position;
     tcs_out[gl_InvocationID].normal = vs_out[gl_InvocationID].normal;
     tcs_out[gl_InvocationID].color = vs_out[gl_InvocationID].color;
     tcs_out[gl_InvocationID].uv = vs_out[gl_InvocationID].uv;

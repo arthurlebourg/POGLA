@@ -1,7 +1,8 @@
 #version 450
 
 layout (lines) in;
-layout (line_strip, max_vertices = 10) out;
+// layout (line_strip, max_vertices = 2) out;
+layout(triangle_strip, max_vertices = 4) out;
 
 in TCE_OUT {
     vec3 normal;
@@ -20,18 +21,49 @@ uniform float far = 300.0;
 
 void main()
 {
-    vec4 clipSpace1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
-    vec4 clipSpace2 = projection_matrix * model_view_matrix * gl_in[1].gl_Position;
-    gl_Position = clipSpace1;
+    vec4 modelSpace1 = model_view_matrix * gl_in[0].gl_Position;
+    vec4 modelSpace2 = model_view_matrix * gl_in[1].gl_Position;
+
+    float size = 0.125;
+    
+    vec2 va = modelSpace1.xy + vec2(0.0, -size);
+    gl_Position = projection_matrix * vec4(va, modelSpace1.z, 1.0);
     gs_out.color = tce_out[0].color;
     gs_out.uv = tce_out[0].uv;
     EmitVertex();
 
-    gl_Position = clipSpace2;
+    vec2 vd = modelSpace2.xy + vec2(0.0, -size);
+    gl_Position = projection_matrix * vec4(vd, modelSpace2.z, 1.0);
     gs_out.color = tce_out[1].color;
     gs_out.uv = tce_out[1].uv;
     EmitVertex();
+
+    vec2 vb = modelSpace1.xy + vec2(0.0, size);
+    gl_Position = projection_matrix * vec4(vb, modelSpace1.z, 1.0);
+    gs_out.color = tce_out[0].color;
+    gs_out.uv = tce_out[0].uv;
+    EmitVertex();
+    
+    vec2 vc = modelSpace2.xy + vec2(0.0, size);
+    gl_Position = projection_matrix * vec4(vc, modelSpace2.z, 1.0);
+    gs_out.color = tce_out[1].color;
+    gs_out.uv = tce_out[1].uv;
+    EmitVertex();
+
     EndPrimitive();
+
+    // vec4 clipSpace1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
+    // vec4 clipSpace2 = projection_matrix * model_view_matrix * gl_in[1].gl_Position;
+    // gl_Position = clipSpace1;
+    // gs_out.color = tce_out[0].color;
+    // gs_out.uv = tce_out[0].uv;
+    // EmitVertex();
+
+    // gl_Position = clipSpace2;
+    // gs_out.color = tce_out[1].color;
+    // gs_out.uv = tce_out[1].uv;
+    // EmitVertex();
+    // EndPrimitive();
     
     return;
     /*
