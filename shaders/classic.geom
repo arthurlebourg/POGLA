@@ -26,6 +26,12 @@ void main()
 
     float size = 0.125;
     
+    if (modelSpace1.x > modelSpace2.x) {
+        vec4 tmp = modelSpace1;
+        modelSpace1 = modelSpace2;
+        modelSpace2 = tmp;
+    }
+    
     vec2 va = modelSpace1.xy + vec2(0.0, -size);
     gl_Position = projection_matrix * vec4(va, modelSpace1.z, 1.0);
     gs_out.color = tce_out[0].color;

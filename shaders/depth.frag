@@ -35,9 +35,9 @@ void main()
     
     float kD = 0.5;
     vec3 diffuse = vec3(0.0, 0.0, 0.0);
+    vec3 normal = normalize(gs_out.normal);
     for (int i = 0; i < NB_LIGHTS; i++)
     {
-        vec3 normal = normalize(gs_out.normal);
         vec3 light_direction = normalize(lights[i] - gs_out.position);
         diffuse += kD * max(dot(light_direction, normal), 0.0) * light_color; 
     }
