@@ -1,7 +1,6 @@
 #pragma once
 
 #include "includes.hh"
-#include "printf.hh"
 #include "mesh.hh"
 
 void test_opengl_error(std::string func, std::string file, int line);

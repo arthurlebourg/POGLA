@@ -5,12 +5,14 @@ layout(vertices = 2) out;
 in VS_OUT {
     vec3 normal;
     vec3 color;
+    vec3 localPos;
     vec2 uv;
 } vs_out[]; // 3 is the adjencent vertex, segment is 0 1
 
 out TCS_OUT {
     vec3 normal;
     vec3 color;
+    vec3 localPos;
     vec2 uv;
 } tcs_out[];
 
@@ -21,6 +23,7 @@ uniform float far = 300.0;
 void main()
 {
     tcs_out[gl_InvocationID].normal = vs_out[gl_InvocationID].normal;
+    tcs_out[gl_InvocationID].localPos = vs_out[gl_InvocationID].localPos;
     tcs_out[gl_InvocationID].uv = vs_out[gl_InvocationID].uv;
     tcs_out[gl_InvocationID].color = vs_out[gl_InvocationID].color;
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;

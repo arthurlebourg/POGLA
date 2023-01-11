@@ -6,6 +6,7 @@ layout(isolines, equal_spacing, ccw) in;
 in TCS_OUT {
     vec3 normal;
     vec3 color;
+    vec3 localPos;
     vec2 uv;
 } tcs_out[];
 
@@ -30,6 +31,8 @@ void main()
 
     vec3 c = mix(tcs_out[0].color, tcs_out[1].color, gl_TessCoord.x);
     tce_out.color = c;
+
+    vec3 localPos = mix(tcs_out[0].localPos, tcs_out[1].localPos, gl_TessCoord.x);
     
     vec2 uv = mix(tcs_out[0].uv, tcs_out[1].uv, gl_TessCoord.x);
     tce_out.uv = uv;
@@ -44,5 +47,12 @@ void main()
     
     // gl_Position = p + vec4(n * (0.0 + rand(p.xy * seed) * dist * 3.0), 0.0);
     // gl_Position = p + vec4(dir * rand(p.xy * seed) * dist * 10.0, 0.0);
-    gl_Position = p + vec4(n * rand(p.xy * seed) * dist * 3.0, 0.0) + vec4(dir * dist * 10.0, 0.0);
+    int beta = 2;
+    float coef = 1.0 / (1.0 + pow((dist + 1e-6) / (1.0 + 1e-6 - dist), beta)); 
+
+    gl_Position = p + vec4(n * rand(localPos.xy * seed) * coef * 0.25, 0.0) + vec4(dir * dist * 10.0, 0.0);
+    // if (dist <= 0.40)
+    //     gl_Position = p + vec4(n * rand(p.xy * seed) * dist * 3.0, 0.0) + vec4(dir * dist * 10.0, 0.0);
+    // else
+    //     gl_Position = p + vec4(n * rand(p.xy * seed) * 0.5, 0.0) + vec4(dir * dist * 10.0, 0.0);
 }

@@ -202,7 +202,7 @@ GLFWwindow *init_window()
     // glfw window creation
     // --------------------
     GLFWwindow *window =
-        glfwCreateWindow(win_w, win_h, "LearnOpenGL", NULL, NULL);
+        glfwCreateWindow(win_w, win_h, "bite à mongus", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -343,15 +343,7 @@ void Program::render(glm::mat4 const &model_view_matrix,
     glLineWidth(5.0f);
     for (auto obj : scene_->get_objs())
     {
-        // create a buffer to hold the printf results
-		//GLuint printBuffer = createPrintBuffer();
-		// bind it to the current program
-		//bindPrintBuffer(lines_shader_.shader_program_, printBuffer);
         obj->draw_segments(lines_shader_);
-        // convert to string, output to console
-		//printf("\n\nGLSL print:\n%s\n", getPrintBufferString(printBuffer).c_str());
-		// clean up
-		//deletePrintBuffer(printBuffer);
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

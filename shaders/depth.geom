@@ -14,6 +14,7 @@ out GS_OUT {
     vec3 position;
     vec3 normal;
     vec3 color;
+    float diffuse;
     vec2 uv;
 } gs_out;
 
@@ -30,6 +31,13 @@ void main()
         gs_out.normal = tes_out[i].normal;
         gs_out.color = tes_out[i].color;
         gs_out.uv = tes_out[i].uv;
+        float kD = 0.5;
+        vec3 normal = normalize(gs_out.normal);
+
+        vec3 light = vec3(50.0, 20.0, 50.0);
+        vec3 light_direction = normalize(light - gs_out.position);
+        float diffuse = kD * max(dot(light_direction, normal), 0.0); 
+        gs_out.diffuse = diffuse;
         EmitVertex();
     }
     EndPrimitive();

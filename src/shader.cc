@@ -24,8 +24,8 @@ Shader::Shader(std::string vertex_shader_src,
                                  fragment_shader_content.length());
     
 
-    glShaderSourcePrint(shader_id[0], 1, (const GLchar **)&(vertex_shd_src), NULL);
-    glShaderSourcePrint(shader_id[1], 1, (const GLchar **)&(fragment_shd_src), NULL);
+    glShaderSource(shader_id[0], 1, (const GLchar **)&(vertex_shd_src), NULL);
+    glShaderSource(shader_id[1], 1, (const GLchar **)&(fragment_shd_src), NULL);
 
     for (int i = 0; i < 2; i++)
     {
@@ -145,14 +145,14 @@ Shader::Shader(std::string vertex_shader_src,
                                  fragment_shader_content.length());
     
 
-    glShaderSourcePrint(shader_id[0], 1, (const GLchar **)&(vertex_shd_src), NULL);
-    glShaderSourcePrint(shader_id[1], 1, (const GLchar **)&(tess_control_shd_src),
+    glShaderSource(shader_id[0], 1, (const GLchar **)&(vertex_shd_src), NULL);
+    glShaderSource(shader_id[1], 1, (const GLchar **)&(tess_control_shd_src),
                    NULL);
-    glShaderSourcePrint(shader_id[2], 1, (const GLchar **)&(tess_eval_shd_src),
+    glShaderSource(shader_id[2], 1, (const GLchar **)&(tess_eval_shd_src),
                    NULL);
-    glShaderSourcePrint(shader_id[3], 1, (const GLchar **)&(geometry_shd_src),
+    glShaderSource(shader_id[3], 1, (const GLchar **)&(geometry_shd_src),
                    NULL);
-    glShaderSourcePrint(shader_id[4], 1, (const GLchar **)&(fragment_shd_src),
+    glShaderSource(shader_id[4], 1, (const GLchar **)&(fragment_shd_src),
                    NULL);
 
     for (int i = 0; i < 5; i++)
