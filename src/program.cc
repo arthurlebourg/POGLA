@@ -202,7 +202,7 @@ GLFWwindow *init_window()
     // glfw window creation
     // --------------------
     GLFWwindow *window =
-        glfwCreateWindow(win_w, win_h, "bite à mongus", NULL, NULL);
+        glfwCreateWindow(win_w, win_h, "Poglamogus", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -285,8 +285,6 @@ void Program::render(glm::vec3 const &position, glm::mat4 const &model_view_matr
     //lines_shader_.set_vec3_uniform("light_pos", scene_->get_light());
     lines_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
     lines_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
-    lines_shader_.set_vec3_uniform("player_pos", position);
-    std::cout << "player_pos = " << position.x << " " << position.y << " " << position.z << std::endl;
     depth_shader_.use();TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();

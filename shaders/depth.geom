@@ -36,7 +36,7 @@ void main()
         vec3 normal = normalize(gs_out.normal);
 
         // vec3 light = vec3(50.0, 300.0, 50.0);
-        vec3 light = player_pos + vec3(0.0, 10.0, 0.0);
+        vec3 light = player_pos + vec3(0.0, 1.0, 0.0);
         vec3 light_direction = normalize(light - gs_out.position);
         float diffuse = kD * max(dot(light_direction, normal), 0.0); 
         gs_out.diffuse = diffuse;
