@@ -27,7 +27,7 @@ public:
 
     void update_depth_texture();
 
-    void render(glm::vec3 const &position, glm::mat4 const &model_view_matrix,
+    void render(glm::mat4 const &model_view_matrix,
                 glm::mat4 const &projection_matrix, float currentTime);
 
 private:

@@ -20,7 +20,7 @@ out GS_OUT {
 
 uniform mat4 model_view_matrix;
 uniform mat4 projection_matrix;
-uniform vec3 player_pos;
+uniform float seed;
 
 void main()
 {
@@ -36,7 +36,8 @@ void main()
         vec3 normal = normalize(gs_out.normal);
 
         // vec3 light = vec3(50.0, 300.0, 50.0);
-        vec3 light = player_pos + vec3(0.0, 1.0, 0.0);
+        vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        vec3 light = cam_pos + vec3(0.0, 20.0, 0.0) * seed;
         vec3 light_direction = normalize(light - gs_out.position);
         float diffuse = kD * max(dot(light_direction, normal), 0.0); 
         gs_out.diffuse = diffuse;

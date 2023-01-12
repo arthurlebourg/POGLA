@@ -112,7 +112,7 @@ void Program::display()
                                    key_states['D'] - key_states['A'],
                                    deltaTime);
 
-        render(scene_->get_player()->get_position(), scene_->get_player()->get_model_view(),
+        render(scene_->get_player()->get_model_view(),
                scene_->get_player()->get_projection(), deltaTime);
 
         processInput(window_);
@@ -278,7 +278,7 @@ GLFWwindow *Program::get_window()
     return window_;
 }
 
-void Program::render(glm::vec3 const &position, glm::mat4 const &model_view_matrix,
+void Program::render(glm::mat4 const &model_view_matrix,
                      glm::mat4 const &projection_matrix, float deltaTime)
 {
     lines_shader_.use();TEST_OPENGL_ERROR();
@@ -288,7 +288,6 @@ void Program::render(glm::vec3 const &position, glm::mat4 const &model_view_matr
     depth_shader_.use();TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("model_view_matrix", model_view_matrix);TEST_OPENGL_ERROR();
     depth_shader_.set_mat4_uniform("projection_matrix", projection_matrix);TEST_OPENGL_ERROR();
-    depth_shader_.set_vec3_uniform("player_pos", position);
     
     GLint m_viewport[4];
 
@@ -342,11 +341,14 @@ void Program::render(glm::vec3 const &position, glm::mat4 const &model_view_matr
     TEST_OPENGL_ERROR();
     //lines_shader_.bind_texture_depth(depth_map_);TEST_OPENGL_ERROR();
     glLineWidth(5.0f);
+    glDisable(GL_CULL_FACE);
     for (auto obj : scene_->get_objs())
     {
         obj->draw_segments(lines_shader_);
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glEnable(GL_CULL_FACE);
 
     // render
     quad_shader_.use();TEST_OPENGL_ERROR();

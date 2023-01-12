@@ -87,7 +87,7 @@ void main()
         float dist = distance(cam_pos, mid_segment);
         dist /= far;
 
-        gl_TessLevelOuter[0] = max(dist * 10.0, 1.0);
-        gl_TessLevelOuter[1] = max(dist * 10.0, 1.0);
+        gl_TessLevelOuter[0] = max((1.0 - dist) * 4.0, 1.0);
+        gl_TessLevelOuter[1] = max((1.0 - dist) * 4.0, 1.0);
     }
 }
