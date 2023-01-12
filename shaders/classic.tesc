@@ -46,16 +46,6 @@ void main()
 
         float dot_adj = dot(adj_to_center, side);
         float dot_main = dot(main_to_center, side);
-        //enablePrintf();
-        //printf("dot_adj: %f dot_main: %f mult: %f\n", dot_adj, dot_main, dot_adj * dot_main);
-
-        /*if (dot_adj * dot_main < 0.0)
-        {
-            gl_TessLevelOuter[0] = 0.0; // discards the patch
-            return;
-        }*/
-
-
         // https://math.stackexchange.com/questions/214187/point-on-the-left-or-right-side-of-a-plane-in-3d-space
 
         // does exactly the same as the above code, but with a matrix, mdr j ai été trop bon

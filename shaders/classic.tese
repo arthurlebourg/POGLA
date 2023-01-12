@@ -45,14 +45,8 @@ void main()
     
     vec3 dir = normalize(cam_pos - p.xyz);
     
-    // gl_Position = p + vec4(n * (0.0 + rand(p.xy * seed) * dist * 3.0), 0.0);
-    // gl_Position = p + vec4(dir * rand(p.xy * seed) * dist * 10.0, 0.0);
     int beta = 2;
     float coef = 1.0 / (1.0 + pow((dist + 1e-6) / (1.0 + 1e-6 - dist), beta)); 
 
-    gl_Position = p + vec4(n * rand(localPos.xy * seed) * coef * 0.15, 0.0) + vec4(dir * dist * 10.0, 0.0);
-    // if (dist <= 0.40)
-    //     gl_Position = p + vec4(n * rand(p.xy * seed) * dist * 3.0, 0.0) + vec4(dir * dist * 10.0, 0.0);
-    // else
-    //     gl_Position = p + vec4(n * rand(p.xy * seed) * 0.5, 0.0) + vec4(dir * dist * 10.0, 0.0);
+    gl_Position = p + vec4(n * rand(localPos.xy * seed) * coef * 0.25, 0.0) + vec4(dir * dist * 10.0, 0.0);
 }

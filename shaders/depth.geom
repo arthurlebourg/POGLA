@@ -27,7 +27,6 @@ void main()
     for (int i = 0; i < 3; i++)
     {
         gl_Position = projection_matrix * model_view_matrix * gl_in[i].gl_Position;
-        //tes_out[i].normal = normalize(mat3(model_view_matrix) * tes_out[i].normal);
         gs_out.position = tes_out[i].position;
         gs_out.normal = tes_out[i].normal;
         gs_out.color = tes_out[i].color;
@@ -35,7 +34,6 @@ void main()
         float kD = 0.5;
         vec3 normal = normalize(gs_out.normal);
 
-        // vec3 light = vec3(50.0, 300.0, 50.0);
         vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
         vec3 light = cam_pos + vec3(0.0, 20.0, 0.0) * seed;
         vec3 light_direction = normalize(light - gs_out.position);

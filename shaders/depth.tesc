@@ -30,29 +30,6 @@ void main()
     tcs_out[gl_InvocationID].uv = vs_out[gl_InvocationID].uv;
     if (gl_InvocationID == 0)
     {
-        /*vec4 clipSpace1 = projection_matrix * model_view_matrix * gl_in[0].gl_Position;
-        vec4 clipSpace2 = projection_matrix * model_view_matrix * gl_in[1].gl_Position;
-
-        if (clipSpace1.w == 0.0 || clipSpace2.w == 0.0)
-        {
-            gl_TessLevelOuter[0] = 0.0;
-            return;
-        }
-
-        vec3 ndcSpace1 = clipSpace1.xyz / clipSpace1.w;
-        vec3 ndcSpace2 = clipSpace2.xyz / clipSpace2.w;
-        vec2 ndcSpace1_2d = clamp(ndcSpace1.xy, -1.0, 1.0);
-        vec2 ndcSpace2_2d = clamp(ndcSpace2.xy, -1.0, 1.0);
-
-        float dist = distance(ndcSpace1_2d, ndcSpace2_2d);
-        
-        gl_TessLevelOuter[0] = vs_out[gl_InvocationID].is_base_triangle;// * dist;
-        gl_TessLevelOuter[1] = vs_out[gl_InvocationID].is_base_triangle;// * dist;
-        gl_TessLevelOuter[2] = vs_out[gl_InvocationID].is_base_triangle;// * dist;
-        gl_TessLevelOuter[3] = vs_out[gl_InvocationID].is_base_triangle;// * dist;
-
-        gl_TessLevelInner[0] = vs_out[gl_InvocationID].is_base_triangle;// * dist;
-        gl_TessLevelInner[1] = vs_out[gl_InvocationID].is_base_triangle;// * dist;*/
         gl_TessLevelOuter[0] = 1.0;
         gl_TessLevelOuter[1] = 1.0;
         gl_TessLevelOuter[2] = 1.0;
