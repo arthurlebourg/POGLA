@@ -110,7 +110,6 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
                 red = mat.diffuse[0];
                 green = mat.diffuse[1];
                 blue = mat.diffuse[2];
-                
             }
             // Loop over vertices in the face.
             for (size_t v = 0; v < fv; v++)
@@ -152,6 +151,14 @@ void load_obj(const char *filename, Mesh &triangle_mesh, Mesh &segments_mesh)
                     ty =
                         attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
                 }
+                
+                // color
+                /*if (attrib.colors.size() > 0)
+                {
+                    red = attrib.colors[3 * size_t(idx.vertex_index) + 0];
+                    green = attrib.colors[3 * size_t(idx.vertex_index) + 1];
+                    blue = attrib.colors[3 * size_t(idx.vertex_index) + 2];
+                }*/
 
                 Vertex vertex = {glm::vec3(vx, vy, vz), glm::vec3(nx, ny, nz),
                                  glm::vec2(tx, ty), glm::vec3(red, green, blue)};

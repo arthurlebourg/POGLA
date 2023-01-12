@@ -5,7 +5,8 @@ int main()
     GLFWwindow *window = init_window();
 
     //Object sce("objects/casa_color.obj", "textures/white.tga", glm::vec3(0, -20, 0), 0.0);
-    Object voiture("objects/car.obj", "textures/white.tga", glm::vec3(0, 20, 0), 1.0);
+    Object voiture("objects/car.obj", "textures/white.tga", glm::vec3(10, 20, 0), 1.0);
+    //voiture.get_body()->setAngularFactor(btVector3(0, 1, 0));
     
     Object plane("objects/plane.obj", "textures/pierre_sang.tga", glm::vec3(0, -35, 0), 0.0);
     Object cube("objects/cube.obj", "textures/white.tga", glm::vec3(0, -30, 5),0.0);
