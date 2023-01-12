@@ -25,12 +25,21 @@ void main()
     vec4 modelSpace2 = model_view_matrix * gl_in[1].gl_Position;
 
     float size = 0.125;
+
+    vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    float dist = distance(cam_pos, gl_in[0].gl_Position.xyz);
+    dist /= 300.0; // far
     
     if (modelSpace1.x > modelSpace2.x) {
         vec4 tmp = modelSpace1;
         modelSpace1 = modelSpace2;
         modelSpace2 = tmp;
     }
+
+    int beta = 2;
+    dist = 1.0 / (1.0 + pow((dist + 1e-6) / (1.0 + 1e-6 - dist), beta)); 
+    
+    // size *= dist;
     
     vec2 va = modelSpace1.xy + vec2(0.0, -size);
     gl_Position = projection_matrix * vec4(va, modelSpace1.z, 1.0);
