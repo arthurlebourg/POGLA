@@ -84,10 +84,14 @@ void main()
             return;
         }
         
-        float dist = distance(cam_pos, mid_segment);
-        dist /= far;
+        vec4 modelSpace1 = model_view_matrix * gl_in[0].gl_Position;
 
-        gl_TessLevelOuter[0] = max((1.0 - dist) * 4.0, 1.0);
-        gl_TessLevelOuter[1] = max((1.0 - dist) * 4.0, 1.0);
+        vec4 modelSpace2 = model_view_matrix * gl_in[1].gl_Position;
+
+        vec2 seg = modelSpace1.xy - modelSpace2.xy;
+        float len = length(seg);
+
+        gl_TessLevelOuter[0] = max(len, 1.0);
+        gl_TessLevelOuter[1] = max(len, 1.0);
     }
 }

@@ -25,11 +25,6 @@ void main()
 
     vec4 modelSpace2 = model_view_matrix * gl_in[1].gl_Position;
 
-
-    vec3 cam_pos = (inverse(model_view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    float dist = distance(cam_pos, gl_in[0].gl_Position.xyz);
-    dist /= 300.0; // far
-
     // int beta = 2;
     // dist = 1.0 / (1.0 + pow((dist + 1e-6) / (1.0 + 1e-6 - dist), beta)); 
     
@@ -39,7 +34,7 @@ void main()
     float len = length(seg);
     
     //float size = 0.125 * len * pow(1.0 - dist, 2.0);
-    float size = 0.125;
+    float size = 0.125 * len;
     //get perpendicular vector
     vec2 perpendicular = normalize(vec2(-seg.y, seg.x));
     
