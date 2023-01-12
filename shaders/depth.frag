@@ -45,6 +45,7 @@ void main()
     // }
 
     vec3 white = vec3(1.0);
+    vec3 black = vec3(0.0);
     vec3 threshold = vec3(0.5);
 
     vec3 texture_color = texture(texture_sampler, gs_out.uv).rgb;
@@ -62,9 +63,18 @@ void main()
     float t = coef;
     int beta = 2;
     coef = 1.0 / (1.0 + pow(t / (1.0 - t), -beta)); 
+
     //coef = pow(coef, 4);
     // coef = 1.0 / (1.0 + exp(-coef-0.5));
+
+
+    // output_depth = vec4(texture_color * gs_out.color * coef + white * coef, LinearizeDepth(gl_FragCoord.z) / far);
     output_depth = vec4(texture_color * gs_out.color * coef + white * (1.0 - coef), LinearizeDepth(gl_FragCoord.z) / far);
+    // output_depth = vec4(texture_color * gs_out.color, LinearizeDepth(gl_FragCoord.z) / far);
+
+
+    // output_depth = vec4(texture_color * gs_out.color + white * (1.0 - coef), LinearizeDepth(gl_FragCoord.z) / far);
+    
     // output_depth = vec4(texture_color * gs_out.color, LinearizeDepth(gl_FragCoord.z) / far);
 
     //output_depth = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1.0); // divide by far for demonstration

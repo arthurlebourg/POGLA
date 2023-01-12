@@ -18,7 +18,7 @@ int main()
     scene->add_player(player);
     scene->add_object(std::make_shared<Object>(plane));
     scene->add_object(std::make_shared<Object>(cube));
-    //scene->add_object(std::make_shared<Object>(sce));
+    // scene->add_object(std::make_shared<Object>(sce));
     scene->add_object(std::make_shared<Object>(voiture));
     for (int i = 0; i < 2; i++)
     {
