@@ -35,6 +35,11 @@ public:
 
     glm::mat4 get_projection();
 
+    void set_projection(const glm::mat4 projection)
+    {
+        projection_ = projection;
+    }
+
     void move(const int forward, const int sideward, const float deltaTime);
 
 private:

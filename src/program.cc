@@ -85,10 +85,14 @@ void keyboard_callback(GLFWwindow *, int key, int, int action, int)
 
 void framebuffer_size_callback(GLFWwindow *, int width, int height)
 {
+    std::cout << "framebuffer_size_callback" << std::endl;
     win_w = width;
     win_h = height;
 
     glViewport(0, 0, width, height);
+    prog->get_scene()->get_player()->set_projection(
+        glm::perspective(glm::radians(60.0f), (float)width / (float)height,
+                         0.1f, 100.0f));
     prog->update_depth_texture();
 }
 
