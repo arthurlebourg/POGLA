@@ -92,7 +92,7 @@ void framebuffer_size_callback(GLFWwindow *, int width, int height)
     glViewport(0, 0, width, height);
     prog->get_scene()->get_player()->set_projection(
         glm::perspective(glm::radians(60.0f), (float)width / (float)height,
-                         0.1f, 100.0f));
+                         0.01f, 300.0f));
     prog->update_depth_texture();
 }
 
